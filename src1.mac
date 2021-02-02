@@ -1,0 +1,15 @@
+/gps/particle ion
+/gps/ion 89 228 0 0
+
+/gps/energy 0 MeV
+#/gps/pos/confine PENShell
+#/PEN/Det/Set/WireType A1
+#/PEN/Det/Set/Confine Harness
+/gps/pos/confine PENShell
+/run/beamOn 1
+
+#/vis/modeling/trajectories/create/drawByParticleID
+#/vis/modeling/trajectories/drawByParticleID-0/default/setDrawStepPts true
+# To select or override default colours (note: e+ is blue by default):
+#/vis/modeling/trajectories/list
+#/vis/modeling/trajectories/drawByParticleID-0/set gamma yellow
