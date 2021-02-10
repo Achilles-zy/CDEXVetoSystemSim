@@ -6,7 +6,6 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(CDEXVetoSystemSim)
 
 # Load some basic macros which are needed later on
-
 include(FindROOT.cmake)
 set(INCLUDE_DIRECTORIES
 ${ROOT_INCLUDE_DIR})
@@ -14,7 +13,6 @@ include_directories( ${INCLUDE_DIRECTORIES})
 set(LINK_DIRECTORIES
 ${ROOT_LIBRARY_DIR})
 link_directories( ${LINK_DIRECTORIES})
-
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
@@ -47,7 +45,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(CDEXVetoSystemSim CDEXVetoSim.cc ${sources} ${headers})
-#target_link_libraries(CDEXVetoSim ${Geant4_LIBRARIES})
+#target_link_libraries(CDEXVetoSystemSim ${Geant4_LIBRARIES})
 target_link_libraries(CDEXVetoSystemSim ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 target_link_libraries(CDEXVetoSystemSim ${Geant4_LIBRARIES})
 
@@ -70,7 +68,6 @@ set(CDEXVetoSystemSim_SCRIPTS
   #filegen_point_source.py
   #scan.c
   vis.mac
-
   src1.mac
   )
 
@@ -86,7 +83,7 @@ endforeach()
 # For internal Geant4 use - but has no effect if you build this
 # example standalone
 #
-#add_custom_target(PENVetoSim.exe DEPENDS PENVetoSim)
+#add_custom_target(CDEXVetoSystemSim.exe DEPENDS CDEXVetoSystemSim)
 
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX

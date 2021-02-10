@@ -90,7 +90,9 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() :
 	logicContainerCrystal(nullptr),
 	logicStringBoxCrystal(nullptr),
 	logicASICPlate(nullptr),
-	logicWire(nullptr)
+	logicWire(nullptr),
+	logicBucketCrystal(nullptr),
+	logicShourdVoid(nullptr)
 {
 	fDetectorMessenger = new CDEXDetectorMessenger(this);
 	matconstructor = new CDEXMaterials;
@@ -103,7 +105,7 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() :
 	fWireType = "A1";
 	fReflectorType = "polishedlumirrorair";
 	//fReflectorType = "PolisherESR_LUT";
-	fMode = "Array-1";
+	fMode = "CDEXBucket";
 	fWirePos = G4ThreeVector();
 	fWireRadius = 0.7 * mm;
 	fWireLength = 4 * cm;
@@ -124,6 +126,9 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() :
 	fOuterShellLength = 33 * cm;
 	fOuterShellHeight = 60 * mm;
 	fOuterShellWidth = 98 * mm;
+	fBucketRadius = 0.75 * m;
+	fBucketHeight = 2 * m;
+	fBucketThickness = 10 * cm;
 	G4cout << "Start Construction" << G4endl;
 	DefineMat();
 	fTargetMaterial = G4Material::GetMaterial("PVT_structure");
@@ -271,6 +276,7 @@ void CDEXDetectorConstruction::DefineMat()
 	matEnGe = G4Material::GetMaterial("EnGe");
 	matNaGe = G4Material::GetMaterial("NaGe");
 	matLN2 = G4Material::GetMaterial("G4_lN2");
+	matGN2 = G4Material::GetMaterial("G4_N");
 	matLAr = G4Material::GetMaterial("G4_lAr");
 	matGAGG = G4Material::GetMaterial("GAGG");
 	matPTFE = G4Material::GetMaterial("PTFE");
@@ -641,6 +647,9 @@ G4VPhysicalVolume* CDEXDetectorConstruction::Construct()
 	if (fMode == "Array-1") {
 		return ConstructArray_1();
 	}
+	if (fMode == "CDEXBucket") {
+		return ConstructBucketSystem();
+	}
 	else {
 		G4cout << "Error: Mode not fount!" << G4endl;
 	}
@@ -812,6 +821,7 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructA2(G4double WireLength) {
 	return logicWire;
 }
 
+//PEN Composite System Design
 G4LogicalVolume* CDEXDetectorConstruction::ConstructPENShell() {
 	G4double ISOuterRadius = 44 * mm;
 	G4double ISOuterHeight = 49 * mm;
@@ -1497,6 +1507,54 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructContainerSiPMArrayLV() {
 	return logicContainerSiPMArray;
 }
 
+G4LogicalVolume* CDEXDetectorConstruction::ConstructSiPM() {
+	G4double SiPMThickness = 0.5 * mm;
+	G4double SiPMWidth = 1.5 * cm;
+	G4double SiPMLength = 1.5 * cm;
+	G4double TPBThickness = 2 * micrometer;
+	G4Box* solidCoatedSiPM = new G4Box("solidCoatedSiPM", SiPMWidth / 2, SiPMLength / 2, SiPMThickness / 2 + TPBThickness);
+	G4LogicalVolume* logicCoatedSiPM = new G4LogicalVolume(solidCoatedSiPM, matTPB, "logicCoatedSiPM");
+	G4Box* solidSiPM = new G4Box("solidSiPM", SiPMWidth / 2, SiPMLength / 2, SiPMThickness / 2);
+	G4LogicalVolume* logicSiPMChip = new G4LogicalVolume(solidSiPM, matSi, "logicSiPMChip");
+	physSiPM0 = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicSiPMChip, "physSiPM0", logicCoatedSiPM, false, 0, CheckOverlaps);
+
+	G4OpticalSurface* TPB_Surf = new G4OpticalSurface("TPB_Surf");
+	TPB_Surf->SetType(dielectric_LUTDAVIS);
+	TPB_Surf->SetModel(DAVIS);
+	TPB_Surf->SetFinish(Detector_LUT);
+
+	G4OpticalSurface* SiPM_Surf = new G4OpticalSurface("SiPM_Surf");
+	SiPM_Surf->SetType(dielectric_LUTDAVIS);
+	SiPM_Surf->SetModel(DAVIS);
+	SiPM_Surf->SetFinish(Detector_LUT);
+
+	const G4int NUMENTRIES_CHIP = 11;
+	const double hc = 6.62606876 * 2.99792458 * 100. / 1.602176462;
+	G4double sipm_pp[NUMENTRIES_CHIP] = { hc / 600. * eV, hc / 590. * eV, hc / 580. * eV, hc / 570. * eV, hc / 560. * eV, hc / 550. * eV, hc / 540. * eV, hc / 530. * eV, hc / 520. * eV,hc / 510. * eV,hc / 500. * eV };
+	G4double sipm_sl[NUMENTRIES_CHIP] = { 0,0,0,0,0,0,0,0,0,0,0 };
+	G4double sipm_ss[NUMENTRIES_CHIP] = { 0,0,0,0,0,0,0,0,0,0,0 };
+	G4double sipm_bs[NUMENTRIES_CHIP] = { 0,0,0,0,0,0,0,0,0,0,0 };
+	G4double sipm_rindex[NUMENTRIES_CHIP] = { 1.406,1.406,1.406,1.406,1.406,1.406,1.406,1.406,1.406,1.406,1.406 };
+	G4double sipm_reflectivity[NUMENTRIES_CHIP] = { 0,0,0,0,0,0,0,0,0,0,0 };
+	// G4double sipm_efficiency[NUMENTRIES_CHIP] = {0.20,0.21,0.23,0.25,0.26,0.28,0.30,0.32,0.34,0.36,0.38};
+	G4double sipm_efficiency[NUMENTRIES_CHIP] = { 1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0 };
+
+	G4MaterialPropertiesTable* SIPM_MPT_Surf = new G4MaterialPropertiesTable();
+	// SIPM_MPT_Surf->AddProperty("SPECULARLOBECONSTANT",sipm_pp,sipm_sl,NUMENTRIES_CHIP);
+	// SIPM_MPT_Surf->AddProperty("SPECULARSPIKECONSTANT",sipm_pp,sipm_ss,NUMENTRIES_CHIP);
+	// SIPM_MPT_Surf->AddProperty("BACKSCATTERCONSTANT",sipm_pp,sipm_bs,NUMENTRIES_CHIP);
+	SIPM_MPT_Surf->AddProperty("REFLECTIVITY", sipm_pp, sipm_reflectivity, NUMENTRIES_CHIP);
+	SIPM_MPT_Surf->AddProperty("EFFICIENCY", sipm_pp, sipm_efficiency, NUMENTRIES_CHIP);
+	// SIPM_MPT_Surf->AddProperty("RINDEX",sipm_pp,sipm_rindex,NUMENTRIES_CHIP);
+
+	SiPM_Surf->SetMaterialPropertiesTable(SIPM_MPT_Surf);
+
+	G4LogicalSkinSurface* SiPM_LSS = new G4LogicalSkinSurface("SiPM_LSS", logicSiPMChip, SiPM_Surf);
+	G4LogicalSkinSurface* TPB_LSS = new G4LogicalSkinSurface("TPB_LSS", logicCoatedSiPM, TPB_Surf);
+
+	return logicCoatedSiPM;
+}
+
 G4AssemblyVolume* CDEXDetectorConstruction::ConstructSArSiPMArray() {
 	G4double SiPMThickness = 0.5 * mm;
 	G4double TPBThickness = 2 * micrometer;
@@ -1673,6 +1731,33 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructASICPlate() {
 	G4LogicalVolume* logicAsicPlate = new G4LogicalVolume(solidAsicPlate, matSi, "logicASICPlate");
 
 	return logicAsicPlate;
+}
+
+//CDEX Bucket Veto System Design
+G4LogicalVolume* CDEXDetectorConstruction::ConstructBucket() {
+	G4double BucketRadius = fBucketRadius;
+	G4double BucketHeight = fBucketHeight;
+	G4double BucketThickness = fBucketThickness;
+	auto solidBucket = new G4Tubs("solidBucket", 0., BucketRadius, BucketHeight / 2, 0., twopi);
+	auto logicBucket = new G4LogicalVolume(solidBucket, matPMMA, "logicBucket");
+
+	auto solidBucketCrystal = new G4Tubs("solidBucketCrystal", 0, BucketRadius - BucketThickness, BucketHeight / 2 - BucketThickness, 0, twopi);
+	logicBucketCrystal = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
+	auto physBucketCrystal = new G4PVPlacement(0, G4ThreeVector(), logicBucketCrystal, "BucketCrystal", logicBucket, false, 0, CheckOverlaps);
+	return logicBucket;
+}
+
+G4LogicalVolume* CDEXDetectorConstruction::ConstructShroud() {
+	G4double ShroudHeight = 1.5 * m;
+	G4double ShroudThickness = 1 * cm;
+	G4double ShroudRadius = fBEGeRadius + 2 * mm + ShroudThickness;
+	auto solidShroud = new G4Tubs("solidShroud", 0., ShroudRadius, ShroudHeight / 2, 0., twopi);
+	auto logicShroud = new G4LogicalVolume(solidShroud, matPMMA, "logicShroud");
+
+	auto solidShroudVoid = new G4Tubs("solidBucketCrystal", 0, ShroudRadius - ShroudThickness, ShroudHeight / 2 - ShroudThickness, 0, twopi);
+	logicShourdVoid = new G4LogicalVolume(solidShroudVoid, matGN2, "logicShroudVoid");
+	auto physShroudVoid = new G4PVPlacement(0, G4ThreeVector(), logicShourdVoid, "ShroudVoid", logicShroud, false, 0, CheckOverlaps);
+	return logicShroud;
 }
 
 G4VPhysicalVolume* CDEXDetectorConstruction::ConstructUnit()
@@ -2528,6 +2613,240 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructSArUnit() {
 	Container_SAr->SetModel(DAVIS);
 	Container_SAr->SetFinish(Polished_LUT);
 
+	return physWorld;
+}
+
+G4VPhysicalVolume* CDEXDetectorConstruction::ConstructBucketSystem() {
+
+	G4NistManager* nist = G4NistManager::Instance();
+	G4bool checkOverlaps = true;
+
+	G4double SmallestUnitHeight = 6 * cm;
+	//=============================================================//
+	//                        World&Envelope                       //
+	//=============================================================//
+
+	G4Material* world_mat = fVacuum;
+	G4Material* env_mat = matLN2;
+	G4Material* det_mat = matEnGe;
+
+	G4double world_size = 300 * cm;
+	G4double env_size = 250 * cm;
+	G4Box* solidWorld = new G4Box("solidWorld", 0.5 * world_size, 0.5 * world_size, 0.5 * world_size);
+	G4LogicalVolume* logicWorld = new G4LogicalVolume(solidWorld, world_mat, "logicWorld");
+	G4VPhysicalVolume* physWorld =
+		new G4PVPlacement(0,                     //no rotation
+			G4ThreeVector(),       //at (0,0,0)
+			logicWorld,            //its logical volume
+			"World",               //its name
+			0,                     //its mother  volume
+			false,                 //no boolean operation
+			0,                     //copy number
+			checkOverlaps);        //overlaps checking
+
+	G4Box* solidEnv = new G4Box("solidEnvelope", 0.5 * env_size, 0.5 * env_size, 0.5 * env_size);
+	G4LogicalVolume* logicEnv = new G4LogicalVolume(solidEnv, env_mat, "logicEnvelope");
+	physEnv = new G4PVPlacement(0, G4ThreeVector(), logicEnv, "Envelope", logicWorld, false, 0, checkOverlaps);
+
+	//=============================================================//
+	//                            Bucket                           //
+	//=============================================================//
+	auto rotBucket = new G4RotationMatrix();
+	auto logicBucket = ConstructBucket();
+	auto physBucket = new G4PVPlacement(rotBucket, G4ThreeVector(), logicBucket, "Bucket", logicEnv, false, 0, checkOverlaps);
+
+	//=============================================================//
+	//                            Shroud                           //
+	//=============================================================//
+
+	auto logicShroud = ConstructShroud();
+	auto physShroud = new G4PVPlacement(0, G4ThreeVector(), logicShroud, "Shroud", logicBucketCrystal, false, 0, checkOverlaps);
+
+	//=============================================================//
+	//                             BEGe                            //
+	//=============================================================//
+	auto rotBEGe = new G4RotationMatrix();
+	G4LogicalVolume* logicBEGe = ConstructBEGe();
+
+	//=============================================================//
+	//                             Wire                            //
+	//=============================================================//
+	G4double WireLength = SmallestUnitHeight;
+	fWireLength = WireLength;
+	if (fWireType == "A1") {
+		logicWire = ConstructA1(WireLength);
+	}
+	else if (fWireType == "A2") {
+		logicWire = ConstructA2(WireLength);
+	}
+	else {
+		G4cout << "Type does not exist!" << G4endl;
+	}
+
+	//=============================================================//
+	//                             ASIC                            //
+	//=============================================================//
+	logicASICPlate = ConstructASICPlate();
+
+	//=============================================================//
+	//                            SiPMs                            //
+	//=============================================================//
+
+	G4LogicalVolume* logicSiPM = ConstructSiPM();
+
+	G4ThreeVector posSiPMUp;
+	G4ThreeVector posSiPMDown;
+	for (G4int i = 0; i < 10; i++) {
+		for (G4int j = 0; j < 6; j++) {
+			auto rotSiPM = new G4RotationMatrix();
+			rotSiPM->rotateZ(60 * j * degree);
+			rotSiPM->rotateY(90 * degree);
+			G4double SiPMCentDist = fBucketRadius - fBucketThickness - 1 * cm;
+			G4double SiPMAng = 60 * j * degree;
+			posSiPMUp = G4ThreeVector(SiPMCentDist * cos(-SiPMAng), SiPMCentDist * sin(-SiPMAng), SmallestUnitHeight / 2 + i * SmallestUnitHeight);
+			posSiPMDown = G4ThreeVector(SiPMCentDist * cos(-SiPMAng), SiPMCentDist * sin(-SiPMAng), -SmallestUnitHeight / 2 - i * SmallestUnitHeight);
+			new G4PVPlacement(rotSiPM, posSiPMUp, logicSiPM, "SiPM", logicBucketCrystal, false, 0, checkOverlaps);
+			new G4PVPlacement(rotSiPM, posSiPMDown, logicSiPM, "SiPM", logicBucketCrystal, false, 0, checkOverlaps);
+		}
+	}
+
+
+	//=============================================================//
+	//                           String                            //
+	//=============================================================//
+	G4AssemblyVolume* logicString = new G4AssemblyVolume();
+
+	// Rotation and translation of a plate inside the assembly
+	G4RotationMatrix* RotBEGe = new G4RotationMatrix();
+	G4ThreeVector PosBEGe = G4ThreeVector(0, 0, 0);
+	G4Transform3D TrBEGe = G4Transform3D(*RotBEGe, PosBEGe);
+
+	G4RotationMatrix* RotASIC = new G4RotationMatrix();
+	G4ThreeVector PosASIC = G4ThreeVector(0, 0, -fBEGeHeight / 2 - fASICThickness / 2 - 1 * mm);
+	G4Transform3D TrASIC = G4Transform3D(*RotASIC, PosASIC);
+
+	G4RotationMatrix* RotWire = new G4RotationMatrix();
+	fWirePos = G4ThreeVector(fWireRadius + fBEGeRadius, 0, 0);
+	G4ThreeVector PosWire = fWirePos;
+	G4Transform3D TrWire = G4Transform3D(*RotWire, PosWire);
+
+	logicString->AddPlacedVolume(logicBEGe, TrBEGe);
+	logicString->AddPlacedVolume(logicASICPlate, TrASIC);
+	logicString->AddPlacedVolume(logicWire, TrWire);
+
+	G4RotationMatrix* RotUnit = new G4RotationMatrix();
+	RotUnit->rotateX(0);
+	// Rotation of the assembly inside the world
+	for (G4int i = 0; i < 2; i++) {
+		G4ThreeVector PosUnit1 = G4ThreeVector(0, 0, (SmallestUnitHeight / 2 + SmallestUnitHeight * i));
+		G4ThreeVector PosUnit2 = G4ThreeVector(0, 0, (-SmallestUnitHeight / 2 - SmallestUnitHeight * i));
+		G4Transform3D TrUnit1 = G4Transform3D(*RotUnit, PosUnit1);
+		G4Transform3D TrUnit2 = G4Transform3D(*RotUnit, PosUnit2);
+		logicString->MakeImprint(logicShourdVoid, TrUnit1);
+		logicString->MakeImprint(logicShourdVoid, TrUnit2);
+	}
+
+
+	//=============================================================//
+	//                        Optical Surfaces                     //
+	//=============================================================//
+
+	G4OpticalSurface* Ge_SAr = new G4OpticalSurface("Ge_SAr");
+	Ge_SAr->SetType(dielectric_metal);
+	Ge_SAr->SetModel(glisur);
+	Ge_SAr->SetFinish(polished);
+
+	G4OpticalSurface* scintWrap = new G4OpticalSurface("ScintWrap");
+	scintWrap->SetModel(unified);
+	scintWrap->SetType(dielectric_dielectric);
+	scintWrap->SetFinish(polished);
+	G4double energyReflector[] = { 2.0 * eV, 3.0 * eV, 4.0 * eV, 5.0 * eV, 6.0 * eV, 7.0 * eV };
+	const G4int num = sizeof(energyReflector) / sizeof(G4double);
+	G4double reflectivity[] = { 0.97, 0.97, 0.97, 0.97, 0.97, 0.97 };
+	assert(sizeof(reflectivity) == sizeof(energyReflector));
+	G4MaterialPropertiesTable* scintWrapProperty = matVikuiti->GetMaterialPropertiesTable();
+	scintWrapProperty->AddProperty("REFLECTIVITY", energyReflector, reflectivity, num);
+	scintWrap->SetMaterialPropertiesTable(scintWrapProperty);
+
+	G4OpticalSurface* PMMA_Dielctric_Ref = new G4OpticalSurface("PMMA_Dielctric_Ref");
+	if (fReflectorType == "polishedvm2000air") {
+		PMMA_Dielctric_Ref->SetType(dielectric_LUT);
+		PMMA_Dielctric_Ref->SetModel(LUT);
+		PMMA_Dielctric_Ref->SetFinish(polishedvm2000air);
+	}
+	else if (fReflectorType == "polishedvm2000glue") {
+		PMMA_Dielctric_Ref->SetType(dielectric_LUT);
+		PMMA_Dielctric_Ref->SetModel(LUT);
+		PMMA_Dielctric_Ref->SetFinish(polishedvm2000glue);
+	}
+	else if (fReflectorType == "polishedtyvekair") {
+		PMMA_Dielctric_Ref->SetType(dielectric_LUT);
+		PMMA_Dielctric_Ref->SetModel(LUT);
+		PMMA_Dielctric_Ref->SetFinish(polishedtyvekair);
+	}
+	else if (fReflectorType == "polishedlumirrorair") {
+		PMMA_Dielctric_Ref->SetType(dielectric_LUT);
+		PMMA_Dielctric_Ref->SetModel(LUT);
+		PMMA_Dielctric_Ref->SetFinish(polishedlumirrorair);
+	}
+	else if (fReflectorType == "PolishedESR_LUT") {
+		PMMA_Dielctric_Ref->SetType(dielectric_LUTDAVIS);
+		PMMA_Dielctric_Ref->SetModel(DAVIS);
+		PMMA_Dielctric_Ref->SetFinish(PolishedESR_LUT);
+	}
+	else if (fReflectorType == "PolishedESRGrease_LUT") {
+		PMMA_Dielctric_Ref->SetType(dielectric_LUTDAVIS);
+		PMMA_Dielctric_Ref->SetModel(DAVIS);
+		PMMA_Dielctric_Ref->SetFinish(PolishedESRGrease_LUT);
+	}
+	else if (fReflectorType == "PolishedTeflon_LUT") {
+		PMMA_Dielctric_Ref->SetType(dielectric_LUTDAVIS);
+		PMMA_Dielctric_Ref->SetModel(DAVIS);
+		PMMA_Dielctric_Ref->SetFinish(PolishedTeflon_LUT);
+	}
+	else if (fReflectorType == "RoughESR_LUT") {
+		PMMA_Dielctric_Ref->SetType(dielectric_LUTDAVIS);
+		PMMA_Dielctric_Ref->SetModel(DAVIS);
+		PMMA_Dielctric_Ref->SetFinish(RoughESR_LUT);
+	}
+	else {
+		PMMA_Dielctric_Ref->SetType(dielectric_LUTDAVIS);
+		PMMA_Dielctric_Ref->SetModel(DAVIS);
+		PMMA_Dielctric_Ref->SetFinish(Polished_LUT);
+	}
+
+	G4OpticalSurface* SAr_SAr = new G4OpticalSurface("SAr_SAr");
+	SAr_SAr->SetType(dielectric_dielectric);
+	SAr_SAr->SetModel(unified);
+	SAr_SAr->SetFinish(polished);
+
+	G4OpticalSurface* PMMA_Dielectric = new G4OpticalSurface("PMMA_Dielectric");
+	PMMA_Dielectric->SetType(dielectric_LUTDAVIS);
+	PMMA_Dielectric->SetModel(LUT);
+	PMMA_Dielectric->SetFinish(Polished_LUT);
+
+	G4OpticalSurface* Ge_Dielectric = new G4OpticalSurface("Ge_Dielectric");
+	Ge_Dielectric->SetType(dielectric_metal);
+	Ge_Dielectric->SetModel(glisur);
+	Ge_Dielectric->SetFinish(polished);
+
+	G4OpticalSurface* Wire_Dielectric = new G4OpticalSurface("Wire_Dielectric");
+	Wire_Dielectric->SetType(dielectric_dielectric);
+	Wire_Dielectric->SetModel(unified);
+	Wire_Dielectric->SetFinish(polished);
+
+	G4OpticalSurface* ASIC_Dielectric = new G4OpticalSurface("ASIC_Dielectric");
+	ASIC_Dielectric->SetType(dielectric_dielectric);
+	ASIC_Dielectric->SetModel(unified);
+	ASIC_Dielectric->SetFinish(polished);
+
+	//G4LogicalSkinSurface* ASIC_LSS = new G4LogicalSkinSurface("ASIC_LSS", logicASICPlate, ASIC_Dielectric);
+	//G4LogicalSkinSurface* Wire_LSS = new G4LogicalSkinSurface("Wire_LSS", logicWire, Wire_Dielectric);
+	//G4LogicalSkinSurface* Bucket_LSS = new G4LogicalSkinSurface("Bucket_LSS", logicBucket, PMMA_Dielectric);
+	//G4LogicalSkinSurface* Shroud_LSS = new G4LogicalSkinSurface("Shroud_LSS", logicShroud, PMMA_Dielectric);
+	//G4LogicalSkinSurface* BEGe_LSS = new G4LogicalSkinSurface("BEGe_LSS", logicBEGe, Ge_Dielectric);
+
+	//GetPhysicalVolumeProperties();
 	return physWorld;
 }
 

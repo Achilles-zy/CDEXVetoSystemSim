@@ -36,14 +36,21 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         const G4VPhysicalVolume* GetEnv() const;
 
         G4VPhysicalVolume* Construct();
-        G4VPhysicalVolume* ConstructUnit();
-        G4VPhysicalVolume* ConstructSArUnit();
-        G4VPhysicalVolume* ConstructArray_1();
         G4VPhysicalVolume* GetPhysicalVolumeByName(const G4String& name);
         void ResetPhysicalVolumeNames();
         void GetPhysicalVolumeProperties();
         std::map<G4VPhysicalVolume*, G4int> VolumeLUT;
         std::map<G4VPhysicalVolume*, G4String> VolumeNameLUT;
+
+		G4LogicalVolume* ConstructBEGe();
+		G4LogicalVolume* ConstructA1(G4double WireLength);
+		G4LogicalVolume* ConstructA2(G4double WireLength);
+		G4LogicalVolume* ConstructASICPlate();
+
+		//PEN Composite System Design
+		G4VPhysicalVolume* ConstructUnit();
+		G4VPhysicalVolume* ConstructSArUnit();
+		G4VPhysicalVolume* ConstructArray_1();
 
         G4LogicalVolume* ConstructOuterShell();
         G4LogicalVolume* ConstructInnerShell();
@@ -51,25 +58,26 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4LogicalVolume* ConstructCSGOuterShell();
         G4LogicalVolume* ConstructCSGInnerShell();
         G4LogicalVolume* ConstructCSGPENShell();
-        G4LogicalVolume* ConstructBEGe();
-        G4LogicalVolume* ConstructA1(G4double WireLength);
-        G4LogicalVolume* ConstructA2(G4double WireLength);
         G4LogicalVolume* ConstructContainerBrick();
         G4LogicalVolume* ConstructStringBoxBrick();
         G4LogicalVolume* ConstructStringBox();
         G4LogicalVolume* ConstructOuterReflector();//Outer Reflector of OuterShell
         G4LogicalVolume* ConstructInnerReflector();//Inner Reflector of OuterShell
         G4LogicalVolume* ConstructReflector();
-        G4LogicalVolume* ConstructASICPlate();
 
         G4LogicalVolume* ConstructSArSiPMArrayLV();
         G4LogicalVolume* ConstructContainerSiPMArrayLV();
         G4LogicalVolume* ConstructSiPMArrayLV();
+		G4LogicalVolume* ConstructSiPM();
 
         G4AssemblyVolume* ConstructSArSiPMArray();
         G4AssemblyVolume* ConstructContainerSiPMArray();
         G4AssemblyVolume* ConstructSiPMArray();
 
+		//CDEX Bucket Veto System Design
+		G4VPhysicalVolume* ConstructBucketSystem();
+		G4LogicalVolume* ConstructBucket();
+		G4LogicalVolume* ConstructShroud();
 
         void DefineMat();
 
@@ -178,6 +186,8 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4LogicalVolume* logicContainerCrystal;
         G4LogicalVolume* logicASICPlate;
         G4LogicalVolume* logicWire;
+		G4LogicalVolume* logicBucketCrystal;
+		G4LogicalVolume* logicShourdVoid;
 
         CDEXMaterials* matconstructor;
 
@@ -228,6 +238,7 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
 		G4Material* matCu;
         G4Material* matNylon;
         G4Material* matTPB;
+		G4Material* matGN2;
 
         G4Material* fDetMat;
 
@@ -255,6 +266,9 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4double fOuterShellLength;
         G4double fOuterShellHeight;
         G4double fOuterShellWidth;
+		G4double fBucketRadius;
+		G4double fBucketHeight;
+		G4double fBucketThickness;
 
         CDEXDetectorMessenger* fDetectorMessenger;
         G4bool CheckOverlaps;

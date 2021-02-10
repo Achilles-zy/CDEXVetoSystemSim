@@ -436,6 +436,19 @@ void CDEXMaterials::Construct()
 
 
 
+	// ------------------------------------------------------------------------
+	// GN2
+	// ------------------------------------------------------------------------
+
+	G4Material* matGN2 = nistManager->FindOrBuildMaterial("G4_N");
+	const G4int NUMENTRIES_GN2 = 11;
+	G4double GN2_PP[NUMENTRIES_GN2] = { hc / 545. * eV, hc / 520. * eV, hc / 495. * eV, hc / 480. * eV, hc / 467. * eV, hc / 450. * eV, hc / 431. * eV, hc / 425. * eV, hc / 419. * eV,hc / 412. * eV,hc / 407. * eV };
+	G4double GN2_RefractiveIndex[NUMENTRIES_GN2] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+	G4double GN2_AbsorptionLength[NUMENTRIES_GN2] = { 100 * m, 10000 * m,100 *m ,100 * m ,100 * m ,100 * m ,100 * m ,100 * m ,100 * m ,100 * m ,100 * m };
+	G4MaterialPropertiesTable* GN2_MPT = new G4MaterialPropertiesTable();
+	GN2_MPT->AddProperty("RINDEX", GN2_PP, GN2_RefractiveIndex, NUMENTRIES_GN2);
+	GN2_MPT->AddProperty("ABSLENGTH", GN2_PP, GN2_AbsorptionLength, NUMENTRIES_GN2);
+	matGN2->SetMaterialPropertiesTable(GN2_MPT);
 
     // ------------------------------------------------------------------------
     // Silicon Oil
