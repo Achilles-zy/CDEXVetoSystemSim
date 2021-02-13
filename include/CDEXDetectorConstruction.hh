@@ -129,6 +129,10 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
             return fPENPropertiesID;
         }
 
+		G4int GetUnitNumber() {
+			return fUnitNb;
+		}
+
         G4double GetPENShellLength() {
             return fPENShellLength;
         }
@@ -148,6 +152,19 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
             return fASICThickness;
         }
 
+		G4double GetBucketOuterRadius() {
+			return fBucketRadius;
+		}
+		G4double GetBucketThickness() {
+			return fBucketThickness;
+		}
+		G4double GetBucketHeight() {
+			return fBucketHeight;
+		}
+
+		G4double GetSmallestUnitHeight() {
+			return fSmallestUnitHeight;
+		}
 
     private:
         G4VPhysicalVolume* physContainerBrick;
@@ -173,7 +190,7 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4VPhysicalVolume* physSiPMArray2;
         G4VPhysicalVolume* physSiPMArray3;
 
-        G4VPhysicalVolume* physWire;
+        //G4VPhysicalVolume* physWire;
         G4VPhysicalVolume* physPENShell;
         G4VPhysicalVolume* physInnerShell;
         G4VPhysicalVolume* physOuterShell;
@@ -249,6 +266,7 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4String fRunInfo;
         G4String fMode;
         G4int fPENPropertiesID;
+		G4int fUnitNb;
         G4ThreeVector fWirePos;
         G4double fWireCentDist;
         G4double fWireRadius;
@@ -269,6 +287,7 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
 		G4double fBucketRadius;
 		G4double fBucketHeight;
 		G4double fBucketThickness;
+		G4double fSmallestUnitHeight;
 
         CDEXDetectorMessenger* fDetectorMessenger;
         G4bool CheckOverlaps;

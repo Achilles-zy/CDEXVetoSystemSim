@@ -80,7 +80,7 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() :
 	physSiPMArray3(nullptr),
 	physOuterReflector(nullptr),
 	physInnerReflector(nullptr),
-	physWire(nullptr),
+	//physWire(nullptr),
 	physContainerBrick(nullptr),//ContainerBrick
 	physContainerCrystal(nullptr),//Crystal in Container
 	physStringBoxBrick(nullptr),
@@ -103,9 +103,9 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() :
 	fABSFile = "PEN_ABS";
 	fConfine = "PENShell";
 	fWireType = "A1";
-	fReflectorType = "polishedlumirrorair";
+	fReflectorType = "PolisherESR_LUT";
 	//fReflectorType = "PolisherESR_LUT";
-	fMode = "CDEXBucket";
+	fMode = "Array-1";
 	fWirePos = G4ThreeVector();
 	fWireRadius = 0.7 * mm;
 	fWireLength = 4 * cm;
@@ -129,6 +129,8 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() :
 	fBucketRadius = 0.75 * m;
 	fBucketHeight = 2 * m;
 	fBucketThickness = 10 * cm;
+	fSmallestUnitHeight = 6 * cm;
+	fUnitNb = 2;
 	G4cout << "Start Construction" << G4endl;
 	DefineMat();
 	fTargetMaterial = G4Material::GetMaterial("PVT_structure");
@@ -753,7 +755,7 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructA1(G4double WireLength) {
 	G4Material* JacketMat = matPTFE;
 
 	G4Tubs* solidWire = new G4Tubs("solidWire", 0 * mm, WireRadius, WireLength / 2, 0, twopi);
-	G4LogicalVolume* logicWire = new G4LogicalVolume(solidWire, JacketMat, "logicWire");
+	logicWire = new G4LogicalVolume(solidWire, JacketMat, "logicWire");
 
 	G4Tubs* solidWireJacket = new G4Tubs("solidWireJacket", WireRadius - WireJacketThickness, WireRadius, WireLength / 2, 0, twopi);
 	G4LogicalVolume* logicWireJacket = new G4LogicalVolume(solidWireJacket, JacketMat, "logicWireJacket");
@@ -1539,15 +1541,15 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructSiPM() {
 	// G4double sipm_efficiency[NUMENTRIES_CHIP] = {0.20,0.21,0.23,0.25,0.26,0.28,0.30,0.32,0.34,0.36,0.38};
 	G4double sipm_efficiency[NUMENTRIES_CHIP] = { 1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0 };
 
-	G4MaterialPropertiesTable* SIPM_MPT_Surf = new G4MaterialPropertiesTable();
+	G4MaterialPropertiesTable* SiPM_MPT_Surf = new G4MaterialPropertiesTable();
 	// SIPM_MPT_Surf->AddProperty("SPECULARLOBECONSTANT",sipm_pp,sipm_sl,NUMENTRIES_CHIP);
 	// SIPM_MPT_Surf->AddProperty("SPECULARSPIKECONSTANT",sipm_pp,sipm_ss,NUMENTRIES_CHIP);
 	// SIPM_MPT_Surf->AddProperty("BACKSCATTERCONSTANT",sipm_pp,sipm_bs,NUMENTRIES_CHIP);
-	SIPM_MPT_Surf->AddProperty("REFLECTIVITY", sipm_pp, sipm_reflectivity, NUMENTRIES_CHIP);
-	SIPM_MPT_Surf->AddProperty("EFFICIENCY", sipm_pp, sipm_efficiency, NUMENTRIES_CHIP);
+	SiPM_MPT_Surf->AddProperty("REFLECTIVITY", sipm_pp, sipm_reflectivity, NUMENTRIES_CHIP);
+	SiPM_MPT_Surf->AddProperty("EFFICIENCY", sipm_pp, sipm_efficiency, NUMENTRIES_CHIP);
 	// SIPM_MPT_Surf->AddProperty("RINDEX",sipm_pp,sipm_rindex,NUMENTRIES_CHIP);
 
-	SiPM_Surf->SetMaterialPropertiesTable(SIPM_MPT_Surf);
+	SiPM_Surf->SetMaterialPropertiesTable(SiPM_MPT_Surf);
 
 	G4LogicalSkinSurface* SiPM_LSS = new G4LogicalSkinSurface("SiPM_LSS", logicSiPMChip, SiPM_Surf);
 	G4LogicalSkinSurface* TPB_LSS = new G4LogicalSkinSurface("TPB_LSS", logicCoatedSiPM, TPB_Surf);
@@ -1742,7 +1744,7 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructBucket() {
 	auto logicBucket = new G4LogicalVolume(solidBucket, matPMMA, "logicBucket");
 
 	auto solidBucketCrystal = new G4Tubs("solidBucketCrystal", 0, BucketRadius - BucketThickness, BucketHeight / 2 - BucketThickness, 0, twopi);
-	logicBucketCrystal = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
+	logicBucketCrystal = new G4LogicalVolume(solidBucketCrystal, fVacuum, "logicBucket");
 	auto physBucketCrystal = new G4PVPlacement(0, G4ThreeVector(), logicBucketCrystal, "BucketCrystal", logicBucket, false, 0, CheckOverlaps);
 	return logicBucket;
 }
@@ -1946,7 +1948,7 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructUnit()
 	Wire_LN2->SetModel(DAVIS);
 	Wire_LN2->SetFinish(Polished_LUT);
 
-	G4LogicalBorderSurface* Wire_LN2_LBS = new G4LogicalBorderSurface("Wire_LN2_LBS", physEnv, physWire, Wire_LN2);
+	//G4LogicalBorderSurface* Wire_LN2_LBS = new G4LogicalBorderSurface("Wire_LN2_LBS", physEnv, physWire, Wire_LN2);
 	G4LogicalBorderSurface* OuterShell_LN2_LBS = new G4LogicalBorderSurface("OuterShell_LN2_LBS", physEnv, physOuterShell, PEN_LN2_Ref);
 	//G4LogicalBorderSurface* LN2_OuterShell_LBS = new G4LogicalBorderSurface("OuterShell_LN2_LBS", physOuterShell, physEnv,  PEN_LN2_Ref);
 	G4LogicalBorderSurface* InnerShell_LN2_LBS = new G4LogicalBorderSurface("InnerShell_LN2_LBS", physEnv, physInnerShell, PEN_LN2);
@@ -2340,7 +2342,7 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructArray_1() {
 		fWireCentDist = outerGeRadius + ShellThickness - WireRadius;
 		WirePlacement = G4ThreeVector(0, fWireCentDist,  0);
 		fWirePos = WirePlacement;
-		physWire = new G4PVPlacement(0, WirePlacement, logicWire, "Wire", logicInnerShell, false, 0, checkOverlaps);
+		auto physWire = new G4PVPlacement(0, WirePlacement, logicWire, "Wire", logicInnerShell, false, 0, checkOverlaps);
 		//physWire = new G4PVPlacement(0, WirePlacement, logicWire, "Wire", logicInnerShell, false, 0, checkOverlaps);
 	}
 	else if (WireType == "A2") {
@@ -2350,7 +2352,7 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructArray_1() {
 		fWireCentDist = outerGeRadius + LN2Gap + ShellThickness - WireRadius;
 		WirePlacement = G4ThreeVector(0, fWireCentDist, 0);
 		fWirePos = WirePlacement;
-		physWire = new G4PVPlacement(0, WirePlacement, logicWire, "Wire", logicInnerShell, false, 0, checkOverlaps);
+		auto physWire = new G4PVPlacement(0, WirePlacement, logicWire, "Wire", logicInnerShell, false, 0, checkOverlaps);
 	}
 	else {
 		G4cout << "Type does not exist!" << G4endl;
@@ -2621,7 +2623,7 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructBucketSystem() {
 	G4NistManager* nist = G4NistManager::Instance();
 	G4bool checkOverlaps = true;
 
-	G4double SmallestUnitHeight = 6 * cm;
+	G4double SmallestUnitHeight = fSmallestUnitHeight;
 	//=============================================================//
 	//                        World&Envelope                       //
 	//=============================================================//
@@ -2693,9 +2695,10 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructBucketSystem() {
 	//=============================================================//
 
 	G4LogicalVolume* logicSiPM = ConstructSiPM();
-
+	//G4LogicalVolume * logicSiPM = ConstructSiPMArrayLV();
 	G4ThreeVector posSiPMUp;
 	G4ThreeVector posSiPMDown;
+	G4PVPlacement* physSiPM[60] = { nullptr };
 	for (G4int i = 0; i < 10; i++) {
 		for (G4int j = 0; j < 6; j++) {
 			auto rotSiPM = new G4RotationMatrix();
@@ -2705,8 +2708,10 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructBucketSystem() {
 			G4double SiPMAng = 60 * j * degree;
 			posSiPMUp = G4ThreeVector(SiPMCentDist * cos(-SiPMAng), SiPMCentDist * sin(-SiPMAng), SmallestUnitHeight / 2 + i * SmallestUnitHeight);
 			posSiPMDown = G4ThreeVector(SiPMCentDist * cos(-SiPMAng), SiPMCentDist * sin(-SiPMAng), -SmallestUnitHeight / 2 - i * SmallestUnitHeight);
-			new G4PVPlacement(rotSiPM, posSiPMUp, logicSiPM, "SiPM", logicBucketCrystal, false, 0, checkOverlaps);
-			new G4PVPlacement(rotSiPM, posSiPMDown, logicSiPM, "SiPM", logicBucketCrystal, false, 0, checkOverlaps);
+			G4int SiPMID1 = 12 * i + 2 * j;
+			G4int SiPMID2 = 12 * i + 2 * j + 1;
+			physSiPM[SiPMID1] = new G4PVPlacement(rotSiPM, posSiPMUp, logicSiPM, "SiPM", logicBucketCrystal, false, 0, checkOverlaps);
+			physSiPM[SiPMID2] = new G4PVPlacement(rotSiPM, posSiPMDown, logicSiPM, "SiPM", logicBucketCrystal, false, 0, checkOverlaps);
 		}
 	}
 
@@ -2714,7 +2719,6 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructBucketSystem() {
 	//=============================================================//
 	//                           String                            //
 	//=============================================================//
-	G4AssemblyVolume* logicString = new G4AssemblyVolume();
 
 	// Rotation and translation of a plate inside the assembly
 	G4RotationMatrix* RotBEGe = new G4RotationMatrix();
@@ -2729,22 +2733,40 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructBucketSystem() {
 	fWirePos = G4ThreeVector(fWireRadius + fBEGeRadius, 0, 0);
 	G4ThreeVector PosWire = fWirePos;
 	G4Transform3D TrWire = G4Transform3D(*RotWire, PosWire);
-
-	logicString->AddPlacedVolume(logicBEGe, TrBEGe);
-	logicString->AddPlacedVolume(logicASICPlate, TrASIC);
-	logicString->AddPlacedVolume(logicWire, TrWire);
-
-	G4RotationMatrix* RotUnit = new G4RotationMatrix();
-	RotUnit->rotateX(0);
-	// Rotation of the assembly inside the world
-	for (G4int i = 0; i < 2; i++) {
+	G4PVPlacement* physBEGe[20] = { nullptr };
+	G4PVPlacement* physWire[20] = { nullptr };
+	G4PVPlacement* physASIC[20] = { nullptr };
+	for (G4int i = 0; i < fUnitNb / 2; i++) {
 		G4ThreeVector PosUnit1 = G4ThreeVector(0, 0, (SmallestUnitHeight / 2 + SmallestUnitHeight * i));
 		G4ThreeVector PosUnit2 = G4ThreeVector(0, 0, (-SmallestUnitHeight / 2 - SmallestUnitHeight * i));
-		G4Transform3D TrUnit1 = G4Transform3D(*RotUnit, PosUnit1);
-		G4Transform3D TrUnit2 = G4Transform3D(*RotUnit, PosUnit2);
-		logicString->MakeImprint(logicShourdVoid, TrUnit1);
-		logicString->MakeImprint(logicShourdVoid, TrUnit2);
+		physBEGe[2 * i] = new G4PVPlacement(RotBEGe, PosUnit1 + PosBEGe, logicBEGe, "BEGe", logicShourdVoid, false, 0, checkOverlaps);
+		physBEGe[2 * i + 1] = new G4PVPlacement(RotBEGe, PosUnit2 + PosBEGe, logicBEGe, "BEGe", logicShourdVoid, false, 0, checkOverlaps);
+		physWire[2 * i] = new G4PVPlacement(RotWire, PosUnit1 + PosWire, logicWire, "Wire", logicShourdVoid, false, 0, checkOverlaps);
+		physWire[2 * i] = new G4PVPlacement(RotWire, PosUnit2 + PosWire, logicWire, "Wire", logicShourdVoid, false, 0, checkOverlaps);
+		physASIC[2 * i] = new G4PVPlacement(RotASIC, PosUnit1 + PosASIC, logicASICPlate, "ASIC", logicShourdVoid, false, 0, checkOverlaps);
+		physASIC[2 * i] = new G4PVPlacement(RotASIC, PosUnit2 + PosASIC, logicASICPlate, "ASIC", logicShourdVoid, false, 0, checkOverlaps);
 	}
+
+
+	//G4AssemblyVolume* logicString = new G4AssemblyVolume();
+	//logicString->AddPlacedVolume(logicBEGe, TrBEGe);
+	//logicString->AddPlacedVolume(logicASICPlate, TrASIC);
+	//logicString->AddPlacedVolume(logicWire, TrWire);
+
+	//G4RotationMatrix* RotUnit = new G4RotationMatrix();
+	//RotUnit->rotateX(0);
+	//// Rotation of the assembly inside the world
+	//for (G4int i = 0; i < fUnitNb/2; i++) {
+	//	G4ThreeVector PosUnit1 = G4ThreeVector(0, 0, (SmallestUnitHeight / 2 + SmallestUnitHeight * i));
+	//	G4ThreeVector PosUnit2 = G4ThreeVector(0, 0, (-SmallestUnitHeight / 2 - SmallestUnitHeight * i));
+	//	G4Transform3D TrUnit1 = G4Transform3D(*RotUnit, PosUnit1);
+	//	G4Transform3D TrUnit2 = G4Transform3D(*RotUnit, PosUnit2);
+	//	logicString->MakeImprint(logicShourdVoid, TrUnit1);
+	//	logicString->MakeImprint(logicShourdVoid, TrUnit2);
+	//}
+
+
+
 
 
 	//=============================================================//
@@ -2840,13 +2862,13 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructBucketSystem() {
 	ASIC_Dielectric->SetModel(unified);
 	ASIC_Dielectric->SetFinish(polished);
 
-	//G4LogicalSkinSurface* ASIC_LSS = new G4LogicalSkinSurface("ASIC_LSS", logicASICPlate, ASIC_Dielectric);
-	//G4LogicalSkinSurface* Wire_LSS = new G4LogicalSkinSurface("Wire_LSS", logicWire, Wire_Dielectric);
-	//G4LogicalSkinSurface* Bucket_LSS = new G4LogicalSkinSurface("Bucket_LSS", logicBucket, PMMA_Dielectric);
-	//G4LogicalSkinSurface* Shroud_LSS = new G4LogicalSkinSurface("Shroud_LSS", logicShroud, PMMA_Dielectric);
-	//G4LogicalSkinSurface* BEGe_LSS = new G4LogicalSkinSurface("BEGe_LSS", logicBEGe, Ge_Dielectric);
+	G4LogicalSkinSurface* ASIC_LSS = new G4LogicalSkinSurface("ASIC_LSS", logicASICPlate, ASIC_Dielectric);
+	G4LogicalSkinSurface* Wire_LSS = new G4LogicalSkinSurface("Wire_LSS", logicWire, Wire_Dielectric);
+	G4LogicalSkinSurface* Bucket_LSS = new G4LogicalSkinSurface("Bucket_LSS", logicBucket, PMMA_Dielectric);
+	G4LogicalSkinSurface* Shroud_LSS = new G4LogicalSkinSurface("Shroud_LSS", logicShroud, PMMA_Dielectric);
+	G4LogicalSkinSurface* BEGe_LSS = new G4LogicalSkinSurface("BEGe_LSS", logicBEGe, Ge_Dielectric);
 
-	//GetPhysicalVolumeProperties();
+	GetPhysicalVolumeProperties();
 	return physWorld;
 }
 

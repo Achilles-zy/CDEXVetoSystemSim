@@ -1,11 +1,11 @@
-/gps/particle ion
-/gps/ion 89 228 0 0
+/gps/particle gamma
 
-/gps/energy 0 MeV
-#/gps/pos/confine PENShell
-#/PEN/Det/Set/WireType A1
-#/PEN/Det/Set/Confine Harness
-/gps/pos/confine PENShell
+/gps/energy 2.6 MeV
+/run/beamOn 1
+
+/gps/particle gamma
+
+/gps/energy 1 MeV
 /run/beamOn 1
 
 #/vis/modeling/trajectories/create/drawByParticleID

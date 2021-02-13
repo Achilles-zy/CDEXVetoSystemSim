@@ -137,6 +137,26 @@ void CDEXRunAction::BeginOfRunAction(const G4Run* aRun)
 		  txtname = "Array-1_" + std::to_string(fDetCons->GetPENPropertiesID()) + "_" + fPrimaryGenerator->GetSrcType() + "_" + fDetCons->GetReflectorType() + fDetCons->GetWireType();
 	  }
   }
+  else if (fDetCons->GetMode() == "CDEXBucket") {
+	  if (fPrimaryGenerator->GetSrcType() == "Bucket") {
+		  //fileName = "Unit_" + fDetCons->GetConfine() + "_" + std::to_string(RunID);
+		  fileName = "CDEXBucket_" + fPrimaryGenerator->GetSrcType();
+		  filename = fileName;
+		  txtname = "CDEXBucket_" + fPrimaryGenerator->GetSrcType();
+	  }
+	  else if (fPrimaryGenerator->GetSrcType() == "Wire") {
+		  //fileName = "Unit_" + fDetCons->GetConfine() + "_" + std::to_string(RunID);
+		  fileName = "CDEXBucket_"+ fPrimaryGenerator->GetSrcType();
+		  filename = fileName;
+		  txtname = "CDEXBucket_"+ fPrimaryGenerator->GetSrcType();
+	  }
+	  else if (fPrimaryGenerator->GetSrcType() == "SingleASIC") {
+		  //fileName = "Unit_" + fDetCons->GetConfine() + "_" + fDetCons->GetWireType() + "_" + std::to_string(RunID);
+		  fileName = "CDEXBucket_" + fPrimaryGenerator->GetSrcType() + "_" + fDetCons->GetWireType();
+		  filename = fileName;
+		  txtname = "CDEXBucket_" + fPrimaryGenerator->GetSrcType() + "_" + fDetCons->GetWireType();
+	  }
+  }
 
   //analysisManager->OpenFile(fileName);
   analysisManager->OpenFile(filename);
@@ -177,19 +197,23 @@ void CDEXRunAction::EndOfRunAction(const G4Run* aRun)
   else if (fDetCons->GetMode() == "SArUnit") {
 	  CDEXOutput(aRun);
   }
+  else if (fDetCons->GetMode() == "CDEXBucket") {
+	  CDEXOutput(aRun);
+  }
   else {
 	  G4cout << "ERRRO! Mode does not exsist, nothing to output!" << G4endl;
   }
 
   ifRefresh = false;
   G4String fileName0 = filename + ".root";
-  G4String fileName1 = filename + "_" + fPrimaryGenerator->GetPrimaryName() + ".root";
+  G4String fileName1 = filename + "_" + fPrimaryGenerator->GetPrimaryName()+ ".root";
   //analysisManager->SetFileName(filename);
   analysisManager->Write();
   analysisManager->CloseFile();
   if (G4RunManager::GetRunManager()->GetRunManagerType() == 1) {
 	  std::rename(fileName0, fileName1);
   }
+  G4cout << "End" << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
