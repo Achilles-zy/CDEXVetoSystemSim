@@ -105,7 +105,7 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() :
 	fWireType = "A1";
 	fReflectorType = "PolisherESR_LUT";
 	//fReflectorType = "PolisherESR_LUT";
-	fMode = "Array-1";
+	fMode = "CDEXBucket";
 	fWirePos = G4ThreeVector();
 	fWireRadius = 0.7 * mm;
 	fWireLength = 4 * cm;
@@ -130,7 +130,7 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() :
 	fBucketHeight = 2 * m;
 	fBucketThickness = 10 * cm;
 	fSmallestUnitHeight = 6 * cm;
-	fUnitNb = 2;
+	fUnitNb = 20;
 	G4cout << "Start Construction" << G4endl;
 	DefineMat();
 	fTargetMaterial = G4Material::GetMaterial("PVT_structure");
@@ -1511,8 +1511,8 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructContainerSiPMArrayLV() {
 
 G4LogicalVolume* CDEXDetectorConstruction::ConstructSiPM() {
 	G4double SiPMThickness = 0.5 * mm;
-	G4double SiPMWidth = 1.5 * cm;
-	G4double SiPMLength = 1.5 * cm;
+	G4double SiPMWidth = 3 * cm;
+	G4double SiPMLength = 3 * cm;
 	G4double TPBThickness = 2 * micrometer;
 	G4Box* solidCoatedSiPM = new G4Box("solidCoatedSiPM", SiPMWidth / 2, SiPMLength / 2, SiPMThickness / 2 + TPBThickness);
 	G4LogicalVolume* logicCoatedSiPM = new G4LogicalVolume(solidCoatedSiPM, matTPB, "logicCoatedSiPM");
@@ -1521,14 +1521,14 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructSiPM() {
 	physSiPM0 = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicSiPMChip, "physSiPM0", logicCoatedSiPM, false, 0, CheckOverlaps);
 
 	G4OpticalSurface* TPB_Surf = new G4OpticalSurface("TPB_Surf");
-	TPB_Surf->SetType(dielectric_LUTDAVIS);
-	TPB_Surf->SetModel(DAVIS);
-	TPB_Surf->SetFinish(Detector_LUT);
+	TPB_Surf->SetType(dielectric_dielectric);
+	TPB_Surf->SetModel(unified);
+	TPB_Surf->SetFinish(polished);
 
 	G4OpticalSurface* SiPM_Surf = new G4OpticalSurface("SiPM_Surf");
-	SiPM_Surf->SetType(dielectric_LUTDAVIS);
-	SiPM_Surf->SetModel(DAVIS);
-	SiPM_Surf->SetFinish(Detector_LUT);
+	SiPM_Surf->SetType(dielectric_dielectric);
+	SiPM_Surf->SetModel(unified);
+	SiPM_Surf->SetFinish(polished);
 
 	const G4int NUMENTRIES_CHIP = 11;
 	const double hc = 6.62606876 * 2.99792458 * 100. / 1.602176462;
@@ -1542,12 +1542,12 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructSiPM() {
 	G4double sipm_efficiency[NUMENTRIES_CHIP] = { 1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0 };
 
 	G4MaterialPropertiesTable* SiPM_MPT_Surf = new G4MaterialPropertiesTable();
-	// SIPM_MPT_Surf->AddProperty("SPECULARLOBECONSTANT",sipm_pp,sipm_sl,NUMENTRIES_CHIP);
-	// SIPM_MPT_Surf->AddProperty("SPECULARSPIKECONSTANT",sipm_pp,sipm_ss,NUMENTRIES_CHIP);
-	// SIPM_MPT_Surf->AddProperty("BACKSCATTERCONSTANT",sipm_pp,sipm_bs,NUMENTRIES_CHIP);
-	SiPM_MPT_Surf->AddProperty("REFLECTIVITY", sipm_pp, sipm_reflectivity, NUMENTRIES_CHIP);
-	SiPM_MPT_Surf->AddProperty("EFFICIENCY", sipm_pp, sipm_efficiency, NUMENTRIES_CHIP);
-	// SIPM_MPT_Surf->AddProperty("RINDEX",sipm_pp,sipm_rindex,NUMENTRIES_CHIP);
+	//SiPM_MPT_Surf->AddProperty("SPECULARLOBECONSTANT",sipm_pp,sipm_sl,NUMENTRIES_CHIP);
+	//SiPM_MPT_Surf->AddProperty("SPECULARSPIKECONSTANT",sipm_pp,sipm_ss,NUMENTRIES_CHIP);
+	//SiPM_MPT_Surf->AddProperty("BACKSCATTERCONSTANT",sipm_pp,sipm_bs,NUMENTRIES_CHIP);
+	//SiPM_MPT_Surf->AddProperty("REFLECTIVITY", sipm_pp, sipm_reflectivity, NUMENTRIES_CHIP);
+	//SiPM_MPT_Surf->AddProperty("EFFICIENCY", sipm_pp, sipm_efficiency, NUMENTRIES_CHIP);
+	SiPM_MPT_Surf->AddProperty("RINDEX",sipm_pp,sipm_rindex,NUMENTRIES_CHIP);
 
 	SiPM_Surf->SetMaterialPropertiesTable(SiPM_MPT_Surf);
 
@@ -1744,7 +1744,7 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructBucket() {
 	auto logicBucket = new G4LogicalVolume(solidBucket, matPMMA, "logicBucket");
 
 	auto solidBucketCrystal = new G4Tubs("solidBucketCrystal", 0, BucketRadius - BucketThickness, BucketHeight / 2 - BucketThickness, 0, twopi);
-	logicBucketCrystal = new G4LogicalVolume(solidBucketCrystal, fVacuum, "logicBucket");
+	logicBucketCrystal = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
 	auto physBucketCrystal = new G4PVPlacement(0, G4ThreeVector(), logicBucketCrystal, "BucketCrystal", logicBucket, false, 0, CheckOverlaps);
 	return logicBucket;
 }
@@ -2710,8 +2710,8 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructBucketSystem() {
 			posSiPMDown = G4ThreeVector(SiPMCentDist * cos(-SiPMAng), SiPMCentDist * sin(-SiPMAng), -SmallestUnitHeight / 2 - i * SmallestUnitHeight);
 			G4int SiPMID1 = 12 * i + 2 * j;
 			G4int SiPMID2 = 12 * i + 2 * j + 1;
-			physSiPM[SiPMID1] = new G4PVPlacement(rotSiPM, posSiPMUp, logicSiPM, "SiPM", logicBucketCrystal, false, 0, checkOverlaps);
-			physSiPM[SiPMID2] = new G4PVPlacement(rotSiPM, posSiPMDown, logicSiPM, "SiPM", logicBucketCrystal, false, 0, checkOverlaps);
+			physSiPM[SiPMID1] = new G4PVPlacement(rotSiPM, posSiPMUp, logicSiPM, "SiPM", logicBucketCrystal, false, SiPMID1, checkOverlaps);
+			physSiPM[SiPMID2] = new G4PVPlacement(rotSiPM, posSiPMDown, logicSiPM, "SiPM", logicBucketCrystal, false, SiPMID2, checkOverlaps);
 		}
 	}
 

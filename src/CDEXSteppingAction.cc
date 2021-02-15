@@ -93,12 +93,17 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	}
 
 	//G4cout << aStep->GetPostStepPoint()->GetPosition() << G4endl;
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 4; i++) {
 		if (volume == detectorConstruction->GetSiPM(i) && detectorConstruction->GetSiPM(i) != nullptr && particle_name == "opticalphoton" ) {
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			CDEXEvent->DetectableTrue();
 			G4int GetCopyNumber0 = touchable->GetCopyNumber(0);
 			G4int GetCopyNumber1 = touchable->GetCopyNumber(1);
+			G4int GetCopyNumber2 = touchable->GetCopyNumber(2);
+			//G4cout << "CpNb0=" << GetCopyNumber0 << G4endl;
+			//G4cout << "CpNb1=" << GetCopyNumber1 << G4endl;
+			//G4cout << "CpNb2=" << GetCopyNumber2 << G4endl;
+			//G4cout << "EndStep"<< G4endl;
 			G4double Energy = aStep->GetPostStepPoint()->GetKineticEnergy() / (1 * eV);
 			G4double WaveLength = 1242 / Energy;//nm
 			G4double SiPMEff = GetEfficiency(WaveLength);

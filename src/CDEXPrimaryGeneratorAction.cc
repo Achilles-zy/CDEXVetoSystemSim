@@ -375,7 +375,7 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 			fCDEXGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("iso");
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Volume");
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisShape("Cylinder");
-			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(BucketThickness * 1.1);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(BucketRadius * 1.1);
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(BucketHeight / 2);
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Bucket");
 		}
