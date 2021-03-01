@@ -68,16 +68,25 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4LogicalVolume* ConstructSArSiPMArrayLV();
         G4LogicalVolume* ConstructContainerSiPMArrayLV();
         G4LogicalVolume* ConstructSiPMArrayLV();
-		G4LogicalVolume* ConstructSiPM();
 
         G4AssemblyVolume* ConstructSArSiPMArray();
         G4AssemblyVolume* ConstructContainerSiPMArray();
         G4AssemblyVolume* ConstructSiPMArray();
 
 		//CDEX Bucket Veto System Design
-		G4VPhysicalVolume* ConstructBucketSystem();
-		G4LogicalVolume* ConstructBucket();
+		G4VPhysicalVolume* ConstructBucketSiPMSystem();
+		G4LogicalVolume* ConstructSiPMBucket();
 		G4LogicalVolume* ConstructShroud();
+        G4LogicalVolume* ConstructSiPM();
+
+        //CDEX Light Fiber Veto System Design
+        G4VPhysicalVolume* ConstructBucketFiberSystem();
+        G4LogicalVolume* ConstructLightFiber(G4double length);
+        G4LogicalVolume* ConstructFiberBucket(G4LogicalVolume**);
+        //G4LogicalVolume* ConstructFiberBucket();
+        G4LogicalVolume* ConstructFiberSiPM();
+        G4LogicalVolume* ConstructShell();
+        void ConstructLightFiberArray(G4LogicalVolume* motherLV, G4ThreeVector pos, G4double radius);
 
         void DefineMat();
 
@@ -167,6 +176,7 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
 		}
 
     private:
+        const G4double LambdaE;
         G4VPhysicalVolume* physContainerBrick;
         G4VPhysicalVolume* physStringBoxBrick;//String Box Brick
 		G4VPhysicalVolume* physBulk;
@@ -203,8 +213,13 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4LogicalVolume* logicContainerCrystal;
         G4LogicalVolume* logicASICPlate;
         G4LogicalVolume* logicWire;
-		G4LogicalVolume* logicBucketCrystal;
+
+        //CDEX Bucket SiPM Design
+		G4LogicalVolume* logicBucketSiPMCrystal;
 		G4LogicalVolume* logicShourdVoid;
+
+        //CDEX Bucket SiPM Design
+        G4LogicalVolume* logicBucketFiberCrystal;
 
         CDEXMaterials* matconstructor;
 
@@ -256,6 +271,8 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4Material* matNylon;
         G4Material* matTPB;
 		G4Material* matGN2;
+        G4Material* matFiber;
+        G4Material* matFluorAcrylic;
 
         G4Material* fDetMat;
 
@@ -288,12 +305,18 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
 		G4double fBucketHeight;
 		G4double fBucketThickness;
 		G4double fSmallestUnitHeight;
+        G4double fFiberRadius;
+        G4double fFiberTPBThickness;
+        G4double fFiberInnerCladdingThickness;
+        G4double fFiberOuterCladdingThickness;
+        G4double fShellThickness;
 
         CDEXDetectorMessenger* fDetectorMessenger;
         G4bool CheckOverlaps;
         G4bool ifOuterReflector;
         G4bool ifInnerReflector;
         G4bool ifReflector;
+        G4bool ifFiberTPB;
 };
 
 inline const G4VPhysicalVolume* CDEXDetectorConstruction::GetPENShell() const

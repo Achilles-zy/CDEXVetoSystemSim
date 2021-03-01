@@ -356,7 +356,7 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 			G4cout << "Error: Src type not found! Using Geant4 default settings." << G4endl;
 		}
 	}
-	else if (mode == "CDEXBucket") {
+	else if (mode == "CDEXSiPMBucket") {
 		if (SrcType == "Bucket") {
 			G4ThreeVector CentCoord;
 			G4double zCoord;

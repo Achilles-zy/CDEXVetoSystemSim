@@ -88,7 +88,11 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 		CDEXEvent->AddBulkEnergy(edep);
 	}
 	
-	if (volume == detectorConstruction->GetEnv() && particle_name == "opticalphoton") {
+	//if (volume == detectorConstruction->GetEnv() && particle_name == "opticalphoton") {
+	//	CDEXEvent->DetectableTrue();
+	//}
+
+	if (particle_name == "opticalphoton") {
 		CDEXEvent->DetectableTrue();
 	}
 

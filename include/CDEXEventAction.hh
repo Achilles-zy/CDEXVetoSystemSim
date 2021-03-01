@@ -50,10 +50,10 @@ class CDEXEventAction : public G4UserEventAction
 
   private:
     G4double edepBulk;
-    G4int SiPMPhotonCount[200][4];
-    G4int SiPMSignalCount[200][4];
-    G4int ContainerSiPMPhotonCount[250][4];
-    G4int ContainerSiPMSignalCount[250][4];
+    G4int SiPMPhotonCount[500][5];
+    G4int SiPMSignalCount[500][5];
+    G4int ContainerSiPMPhotonCount[500][5];
+    G4int ContainerSiPMSignalCount[500][5];
     G4int PhotonCut_0;
     G4int PhotonCut_1;
     G4int PhotonCut_2;
