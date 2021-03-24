@@ -86,6 +86,8 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() :
 	physStringBoxBrick(nullptr),
 	physStringBoxCrystal(nullptr),//Crystal in String Box
 	physASICPlate(nullptr),
+	logicBEGe(nullptr),
+	logicBulk(nullptr),
 	//logicPENShell(nullptr),
 	logicContainerCrystal(nullptr),
 	logicStringBoxCrystal(nullptr),
@@ -133,6 +135,8 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() :
 	fBucketThickness = 10 * cm;
 	fSmallestUnitHeight = 8 * cm;
 	fUnitNb = 30;
+	fFiberPlacementRadius = 0.295 * m;
+	fFiberPlacementCenter = G4ThreeVector(0, 0, 0);
 
 	fFiberRadius = 0.5 * mm;
 	fFiberTPBThickness = 0.6 * micrometer;
@@ -732,7 +736,7 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructBEGe() {
 
 	auto GeInTemp4 = new G4SubtractionSolid("GeInTemp4", GeInTemp3, GeLargerGroove, 0, zTransGroove);
 	auto solidBulk = new G4SubtractionSolid("Bulk", GeInTemp4, GeOuterpLayer, 0, zbulkTransOuterp);
-	auto logicBulk = new G4LogicalVolume(solidBulk, matEnGe, "Bulk");
+	logicBulk = new G4LogicalVolume(solidBulk, matEnGe, "Bulk");
 
 	//deadlayer
 	auto tempdeadlayer = new G4SubtractionSolid("tempdeadlayer", solidTotalCrystal, GeInTemp3, 0, G4ThreeVector(0., 0., 0.));
@@ -1844,31 +1848,8 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructShroud() {
 }
 
 //CDEX Bucket-Fiber Veto System Design
-G4LogicalVolume* CDEXDetectorConstruction::ConstructFiberBucket(G4LogicalVolume** BucketCrystalLV) {
-	G4double BucketRadius = fBucketRadius;
-	G4double BucketHeight = fBucketHeight;
-	G4double BucketThickness = fBucketThickness;
-	auto solidBucket = new G4Tubs("solidBucket", 0., BucketRadius, BucketHeight / 2, 0., twopi);
-	auto logicBucket = new G4LogicalVolume(solidBucket, matPMMA, "logicBucket");
 
-	auto solidBucketCrystal = new G4Tubs("solidBucketCrystal", 0, BucketRadius - BucketThickness, BucketHeight / 2 - BucketThickness, 0, twopi);
-	//logicBucketFiberCrystal = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
-
-	G4LogicalVolume* LV = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
-	logicBucketFiberCrystal = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
-	*BucketCrystalLV = LV;
-	//logicBucketFiberCrystal = LV;
-
-	G4cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << G4endl;
-	G4cout << "logicBucketFiberCrystal" << logicBucketFiberCrystal << G4endl;
-	G4cout << "BucketCrystalLV" << BucketCrystalLV << G4endl;
-	G4cout << "LV-" << LV << G4endl;
-	G4cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << G4endl;
-	auto physBucketCrystal = new G4PVPlacement(0, G4ThreeVector(), logicBucketFiberCrystal, "BucketCrystal", logicBucket, false, 0, CheckOverlaps);
-	return logicBucket;
-}
-
-//G4LogicalVolume* CDEXDetectorConstruction::ConstructFiberBucket() {
+//G4LogicalVolume* CDEXDetectorConstruction::ConstructFiberBucket(G4LogicalVolume** BucketCrystalLV) {
 //	G4double BucketRadius = fBucketRadius;
 //	G4double BucketHeight = fBucketHeight;
 //	G4double BucketThickness = fBucketThickness;
@@ -1876,12 +1857,36 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructFiberBucket(G4LogicalVolume*
 //	auto logicBucket = new G4LogicalVolume(solidBucket, matPMMA, "logicBucket");
 //
 //	auto solidBucketCrystal = new G4Tubs("solidBucketCrystal", 0, BucketRadius - BucketThickness, BucketHeight / 2 - BucketThickness, 0, twopi);
-//	G4LogicalVolume* LV = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
 //	//logicBucketFiberCrystal = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
-//	logicBucketFiberCrystal = LV; 
+//
+//	G4LogicalVolume* LV = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
+//	logicBucketFiberCrystal = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
+//	*BucketCrystalLV = LV;
+//	//logicBucketFiberCrystal = LV;
+//
+//	G4cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << G4endl;
+//	G4cout << "logicBucketFiberCrystal" << logicBucketFiberCrystal << G4endl;
+//	G4cout << "BucketCrystalLV" << BucketCrystalLV << G4endl;
+//	G4cout << "LV-" << LV << G4endl;
+//	G4cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << G4endl;
 //	auto physBucketCrystal = new G4PVPlacement(0, G4ThreeVector(), logicBucketFiberCrystal, "BucketCrystal", logicBucket, false, 0, CheckOverlaps);
 //	return logicBucket;
 //}
+
+G4LogicalVolume* CDEXDetectorConstruction::ConstructFiberBucket() {
+	G4double BucketRadius = fBucketRadius;
+	G4double BucketHeight = fBucketHeight;
+	G4double BucketThickness = fBucketThickness;
+	auto solidBucket = new G4Tubs("solidBucket", 0., BucketRadius, BucketHeight / 2, 0., twopi);
+	auto logicBucket = new G4LogicalVolume(solidBucket, matPMMA, "logicBucket");
+
+	auto solidBucketCrystal = new G4Tubs("solidBucketCrystal", 0, BucketRadius - BucketThickness, BucketHeight / 2 - BucketThickness, 0, twopi);
+	G4LogicalVolume* LV = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
+	//logicBucketFiberCrystal = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
+	logicBucketFiberCrystal = LV; 
+	auto physBucketCrystal = new G4PVPlacement(0, G4ThreeVector(), logicBucketFiberCrystal, "BucketCrystal", logicBucket, false, 0, CheckOverlaps);
+	return logicBucket;
+}
 
 
 G4LogicalVolume* CDEXDetectorConstruction::ConstructShell() {
@@ -1989,12 +1994,17 @@ void CDEXDetectorConstruction::ConstructLightFiberArray(G4LogicalVolume* motherL
 	G4LogicalVolume* logicFiberSiPM = ConstructFiberSiPM();
 	G4LogicalVolume* MotherLV = motherLV;
 
+	G4double BoardThickness = 1 * mm;
+	G4Tubs* solidSiBoard = new G4Tubs("solidSiBoard", 0, fFiberRadius, BoardThickness / 2, 0, twopi);
+	G4LogicalVolume* logicSiBoard = new G4LogicalVolume(solidSiBoard, matSi, "logicSiBoard");
+
 	G4double DeltaAngle = 2 * asin((fFiberRadius + fFiberTPBThickness) / PlacementRadius);
 	G4int FiberAmount = std::floor(twopi / DeltaAngle);
 	G4double RealDeltaAngle = twopi / FiberAmount;
 
 	G4PVPlacement* physLightFiber[4000] = { nullptr };
 	G4PVPlacement* physFiberSiPM[4000] = { nullptr };
+	G4PVPlacement* physSiBoard[4000] = { nullptr };
 	for (G4int FiberNb = 0; FiberNb < FiberAmount; FiberNb++) {
 		G4double PosAngle = FiberNb * RealDeltaAngle;
 		G4ThreeVector posFiber = G4ThreeVector(PlacementRadius * cos(PosAngle), PlacementRadius * sin(PosAngle), 0);
@@ -2003,6 +2013,7 @@ void CDEXDetectorConstruction::ConstructLightFiberArray(G4LogicalVolume* motherL
 		rotFiber->rotateZ(PosAngle);
 		physLightFiber[FiberNb] = new G4PVPlacement(rotFiber, posFiber + PlacementCenter, logicFiber, "Fiber", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
 		physFiberSiPM[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPM + PlacementCenter, logicFiberSiPM, "FiberSiPM", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
+		physSiBoard[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPM + PlacementCenter + G4ThreeVector(0, 0, FiberSiPMThickness / 2 + FiberSiPMTPBThickness + BoardThickness / 2), logicSiBoard, "SiBoard", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
 	}
 }
 
@@ -2914,7 +2925,8 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructBucketSiPMSystem() {
 	//                             BEGe                            //
 	//=============================================================//
 	auto rotBEGe = new G4RotationMatrix();
-	G4LogicalVolume* logicBEGe = ConstructBEGe();
+	//auto logicBEGe = ConstructBEGe();
+	logicBEGe = ConstructBEGe();
 
 	//=============================================================//
 	//                             Wire                            //
@@ -3156,8 +3168,8 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructBucketFiberSystem() {
 	auto rotBucket = new G4RotationMatrix();
 	G4LogicalVolume** logicFiberBucketCrystal2;
 	//G4cout << "LV2before" << logicFiberBucketCrystal2 << G4endl;
-	auto logicBucket = ConstructFiberBucket(logicFiberBucketCrystal2);
-	//auto logicBucket = ConstructFiberBucket();
+	//auto logicBucket = ConstructFiberBucket(logicFiberBucketCrystal2);
+	auto logicBucket = ConstructFiberBucket();
 	//G4LogicalVolume* logicFiberBucketCrystalLocal = *logicFiberBucketCrystal2;
 
 	//G4cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << G4endl;
@@ -3201,7 +3213,7 @@ G4VPhysicalVolume* CDEXDetectorConstruction::ConstructBucketFiberSystem() {
 	//=============================================================//
 	//                      Light Fiber Array                      //
 	//=============================================================//
-	ConstructLightFiberArray(logicBucketFiberCrystal, G4ThreeVector(0, 0, 0), 0.295 * m);
+	ConstructLightFiberArray(logicBucketFiberCrystal, fFiberPlacementCenter, fFiberPlacementRadius);
 	
 	//=============================================================//
 	//                           String                            //

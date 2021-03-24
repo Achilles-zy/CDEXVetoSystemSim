@@ -61,6 +61,20 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
   analysisManager->CreateNtupleDColumn(2, "Edep");
   analysisManager->FinishNtuple(2);
 
+  analysisManager->CreateNtuple("EdepEnv", "Edep outside Detector");
+  analysisManager->CreateNtupleDColumn(3, "PosX");
+  analysisManager->CreateNtupleDColumn(3, "PosY");
+  analysisManager->CreateNtupleDColumn(3, "PosZ");
+  analysisManager->CreateNtupleDColumn(3, "Edep");
+  analysisManager->FinishNtuple(3);
+
+  analysisManager->CreateNtuple("EdepEnvVeto", "Edep outside Detector");
+  analysisManager->CreateNtupleDColumn(4, "PosX");
+  analysisManager->CreateNtupleDColumn(4, "PosY");
+  analysisManager->CreateNtupleDColumn(4, "PosZ");
+  analysisManager->CreateNtupleDColumn(4, "Edep");
+  analysisManager->FinishNtuple(4);
+
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->RegisterAccumulable(SiPMEventCount);
   accumulableManager->RegisterAccumulable(VetoEventCount);
@@ -137,7 +151,7 @@ void CDEXRunAction::BeginOfRunAction(const G4Run* aRun)
 		  txtname = "Array-1_" + std::to_string(fDetCons->GetPENPropertiesID()) + "_" + fPrimaryGenerator->GetSrcType() + "_" + fDetCons->GetReflectorType() + fDetCons->GetWireType();
 	  }
   }
-  else if (fDetCons->GetMode() == "CDEXBucket") {
+  else if (fDetCons->GetMode() == "CDEXSiPMBucket") {
 	  if (fPrimaryGenerator->GetSrcType() == "Bucket") {
 		  //fileName = "Unit_" + fDetCons->GetConfine() + "_" + std::to_string(RunID);
 		  fileName = "CDEXBucket_" + fPrimaryGenerator->GetSrcType();
@@ -146,15 +160,29 @@ void CDEXRunAction::BeginOfRunAction(const G4Run* aRun)
 	  }
 	  else if (fPrimaryGenerator->GetSrcType() == "Wire") {
 		  //fileName = "Unit_" + fDetCons->GetConfine() + "_" + std::to_string(RunID);
-		  fileName = "CDEXBucket_"+ fPrimaryGenerator->GetSrcType();
+		  fileName = "CDEXBucket_" + fPrimaryGenerator->GetSrcType();
 		  filename = fileName;
-		  txtname = "CDEXBucket_"+ fPrimaryGenerator->GetSrcType();
+		  txtname = "CDEXBucket_" + fPrimaryGenerator->GetSrcType();
 	  }
 	  else if (fPrimaryGenerator->GetSrcType() == "SingleASIC") {
 		  //fileName = "Unit_" + fDetCons->GetConfine() + "_" + fDetCons->GetWireType() + "_" + std::to_string(RunID);
 		  fileName = "CDEXBucket_" + fPrimaryGenerator->GetSrcType() + "_" + fDetCons->GetWireType();
 		  filename = fileName;
 		  txtname = "CDEXBucket_" + fPrimaryGenerator->GetSrcType() + "_" + fDetCons->GetWireType();
+	  }
+  }
+  else if (fDetCons->GetMode() == "CDEXFiberBucket") {
+	  if (fPrimaryGenerator->GetSrcType() == "Wire") {
+		  //fileName = "Unit_" + fDetCons->GetConfine() + "_" + fDetCons->GetWireType() + "_" + std::to_string(RunID);
+		  fileName = "CDEXBucket_" + fPrimaryGenerator->GetSrcType() + "_" + fDetCons->GetWireType();
+		  filename = fileName;
+		  txtname = "CDEXBucket_" + fPrimaryGenerator->GetSrcType() + "_" + fDetCons->GetWireType();
+	  }
+	  else
+	  {
+		  fileName = "CDEXBucket_" + fPrimaryGenerator->GetSrcType();
+		  filename = fileName;
+		  txtname = "CDEXBucket_" + fPrimaryGenerator->GetSrcType();
 	  }
   }
 
@@ -197,7 +225,7 @@ void CDEXRunAction::EndOfRunAction(const G4Run* aRun)
   else if (fDetCons->GetMode() == "SArUnit") {
 	  CDEXOutput(aRun);
   }
-  else if (fDetCons->GetMode() == "CDEXBucket") {
+  else if (fDetCons->GetMode() == "CDEXFiberBucket"|| fDetCons->GetMode() == "CDEXSiPMBucket") {
 	  CDEXOutput(aRun);
   }
   else {

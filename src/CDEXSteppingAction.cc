@@ -16,6 +16,7 @@
 #include "G4HadronicProcessType.hh"
 #include "G4EmProcessSubType.hh"
 #include "G4SystemOfUnits.hh"
+#include "g4root.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -30,6 +31,15 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	EnableAcc = CDEXRun->GetAccelerate();
 	//G4cout << "EnableAcc: " << CDEXRun->GetAccelerate() << G4endl;
 	auto volume = aStep->GetPostStepPoint()->GetTouchableHandle()->GetVolume();
+	G4ThreeVector EvtPos = aStep->GetPostStepPoint()->GetPosition();
+	G4LogicalVolume* logicvolume;
+	if (volume) {
+		logicvolume = volume->GetLogicalVolume();
+		//G4cout << volume << volume->GetName() << G4endl;
+		//G4cout << logicvolume << logicvolume->GetName() << G4endl;
+		//G4cout << G4endl;
+	}
+
 	auto touchable = aStep->GetPostStepPoint()->GetTouchableHandle();
 	auto particle_name = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
 
@@ -76,28 +86,34 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 		//	aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 		//}
 	}
-
+	
 	//***********************************************************//
 
 	const CDEXDetectorConstruction* detectorConstruction
 		= static_cast<const CDEXDetectorConstruction*>
 		(G4RunManager::GetRunManager()->GetUserDetectorConstruction());
 
-	if (volume == detectorConstruction->GetBulk() && particle_name != "opticalphoton") {
+	if (logicvolume == detectorConstruction->GetLogicBulk() && particle_name != "opticalphoton") {
 		//CDEXEvent->BulkTrue();
 		CDEXEvent->AddBulkEnergy(edep);
 	}
-	
-	//if (volume == detectorConstruction->GetEnv() && particle_name == "opticalphoton") {
+
+	//if (particle_name == "opticalphoton") {
 	//	CDEXEvent->DetectableTrue();
 	//}
 
-	if (particle_name == "opticalphoton") {
+	if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && edep > 0) {
 		CDEXEvent->DetectableTrue();
+		auto analysisManager = G4AnalysisManager::Instance();
+		analysisManager->FillNtupleDColumn(3, 0, EvtPos.getX());
+		analysisManager->FillNtupleDColumn(3, 0, EvtPos.getY());
+		analysisManager->FillNtupleDColumn(3, 0, EvtPos.getZ());
+		analysisManager->FillNtupleDColumn(3, 0, edep);
 	}
 
 	//G4cout << aStep->GetPostStepPoint()->GetPosition() << G4endl;
-	for (int i = 0; i < 4; i++) {
+	//for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 2; i++) {
 		if (volume == detectorConstruction->GetSiPM(i) && detectorConstruction->GetSiPM(i) != nullptr && particle_name == "opticalphoton" ) {
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			CDEXEvent->DetectableTrue();
@@ -110,7 +126,8 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 			//G4cout << "EndStep"<< G4endl;
 			G4double Energy = aStep->GetPostStepPoint()->GetKineticEnergy() / (1 * eV);
 			G4double WaveLength = 1242 / Energy;//nm
-			G4double SiPMEff = GetEfficiency(WaveLength);
+			//G4double SiPMEff = GetEfficiency(WaveLength);
+			G4double SiPMEff = 0.5;
 			//G4cout << "Wavelength = " << WaveLength << " nm" << G4endl;	
 			//G4cout << "Efficiency = " << SiPMEff  << G4endl;
 			G4double rnd = G4UniformRand();

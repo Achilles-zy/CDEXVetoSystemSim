@@ -34,6 +34,8 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         const G4VPhysicalVolume* GetSiPM(G4int i) const;
         const G4VPhysicalVolume* GetContainerSiPM(G4int i) const;
         const G4VPhysicalVolume* GetEnv() const;
+        const G4LogicalVolume* GetLogicBEGe() const;
+        const G4LogicalVolume* GetLogicBulk() const;
 
         G4VPhysicalVolume* Construct();
         G4VPhysicalVolume* GetPhysicalVolumeByName(const G4String& name);
@@ -82,8 +84,8 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         //CDEX Light Fiber Veto System Design
         G4VPhysicalVolume* ConstructBucketFiberSystem();
         G4LogicalVolume* ConstructLightFiber(G4double length);
-        G4LogicalVolume* ConstructFiberBucket(G4LogicalVolume**);
-        //G4LogicalVolume* ConstructFiberBucket();
+        //G4LogicalVolume* ConstructFiberBucket(G4LogicalVolume**);
+        G4LogicalVolume* ConstructFiberBucket();
         G4LogicalVolume* ConstructFiberSiPM();
         G4LogicalVolume* ConstructShell();
         void ConstructLightFiberArray(G4LogicalVolume* motherLV, G4ThreeVector pos, G4double radius);
@@ -175,6 +177,19 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
 			return fSmallestUnitHeight;
 		}
 
+        G4double GetFiberRadius() {
+            return fFiberRadius;
+        }
+        G4double GetFiberTPBThickness() {
+            return fFiberTPBThickness;
+        }
+        G4double GetFiberPlacementRadius() {
+            return fFiberPlacementRadius;
+        }
+        G4ThreeVector GetFiberPlacementCenter() {
+            return fFiberPlacementCenter;
+        }
+
     private:
         const G4double LambdaE;
         G4VPhysicalVolume* physContainerBrick;
@@ -209,6 +224,8 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4VPhysicalVolume* physContainerCrystal;//Crystal in Container
         G4VPhysicalVolume* physStringBoxCrystal;//Crystal in String Box
         G4VPhysicalVolume* physASICPlate;
+        G4LogicalVolume* logicBEGe;
+        G4LogicalVolume* logicBulk;
         G4LogicalVolume* logicStringBoxCrystal;
         G4LogicalVolume* logicContainerCrystal;
         G4LogicalVolume* logicASICPlate;
@@ -310,6 +327,8 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4double fFiberInnerCladdingThickness;
         G4double fFiberOuterCladdingThickness;
         G4double fShellThickness;
+        G4double fFiberPlacementRadius;
+        G4ThreeVector fFiberPlacementCenter;
 
         CDEXDetectorMessenger* fDetectorMessenger;
         G4bool CheckOverlaps;
@@ -332,6 +351,16 @@ inline const G4VPhysicalVolume* CDEXDetectorConstruction::GetBulk() const
 inline const G4VPhysicalVolume* CDEXDetectorConstruction::GetEnv() const
 {
     return physEnv;
+}
+
+inline const G4LogicalVolume* CDEXDetectorConstruction::GetLogicBEGe() const
+{
+    return logicBEGe;
+}
+
+inline const G4LogicalVolume* CDEXDetectorConstruction::GetLogicBulk() const
+{
+    return logicBulk;
 }
 
 inline const G4VPhysicalVolume* CDEXDetectorConstruction::GetSiPM(G4int i) const

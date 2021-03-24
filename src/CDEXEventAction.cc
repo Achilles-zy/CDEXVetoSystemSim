@@ -74,7 +74,7 @@ void CDEXEventAction::BeginOfEventAction(const G4Event* evt)
 	SignalSiPMCount_2 = 0;
 	SignalSiPMCount_3 = 0;
 	SignalSiPMCount_4 = 0;
-	MinSignalSiPMCount = 2;
+	MinSignalSiPMCount = 1;
 	EscapedPhotonCount = 0;
 	ifSiPM = false;
 	ifBulk = false;
@@ -143,6 +143,8 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 		//G4cout<<G4endl;
 	}
 
+
+
 	analysisManager->FillNtupleIColumn(1, 0, TotalSiPMPhotonCount);
 	analysisManager->AddNtupleRow(1);
 	//G4cout << SiPMPhotonCount << G4endl;
@@ -175,13 +177,23 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 		run->CountVetoEvent_4();
 	}
 
-	if (edepBulk > EnergyThreshold){
-		run->CountBulkEvent();
-		analysisManager->FillH1(3, TotalSiPMPhotonCount);
+	if (TotalSignalSiPMCount > 0) {
+	//for (int i = 0; i < RowNb; i++)
+	//{
+	//	for (int j = 0; j < ColumnNb; j++)
+	//	{
+	//		G4cout << SiPMSignalCount[i][j] << " ";
+	//	}
+	//	G4cout << G4endl;
+	//}
+		//G4cout << "TotalSignalSiPMCount = " << TotalSignalSiPMCount << G4endl;
+		//G4cout << "Matrix End" << G4endl;
+		run->CountSiPMEvent();
 	}
 
-	if (TotalSignalSiPMCount > 0) {
-		run->CountSiPMEvent();
+	if (edepBulk > EnergyThreshold) {
+		run->CountBulkEvent();
+		analysisManager->FillH1(3, TotalSiPMPhotonCount);
 	}
 
 	if (ifDetectable == true) {
