@@ -31,6 +31,9 @@ class CDEXEventAction : public G4UserEventAction
     void CountEscapedPhoton(G4int ph) { EscapedPhotonCount = EscapedPhotonCount + ph; }
     G4int GetTotalSiPMPhotonCnt() { return TotalSiPMPhotonCount; }
 
+    void RecordStepInfo(G4double posx, G4double posy, G4double posz, G4double edep);
+    void RecordStepInfoInScintillator(G4double posx, G4double posy, G4double posz, G4double edep);
+
     G4int GetRowNb() { return RowNb; }
     G4int GetColumnNb() { return ColumnNb; }
     G4int GetContainerRowNb() { return RowNb; }
@@ -73,6 +76,10 @@ class CDEXEventAction : public G4UserEventAction
     G4int MinSignalSiPMCount;
 
     G4int Total;
+    G4int DepositeID;
+    //G4double DepositeInfo[500][4];
+    std::vector<std::vector<G4double>> DepositeInfo;
+    std::vector<std::vector<G4double>> DepositeInfoInScintillator;
 
     G4int ID;
 	G4int TotalSiPMPhotonCount;
@@ -84,6 +91,7 @@ class CDEXEventAction : public G4UserEventAction
     G4bool ifDetectable;
     G4bool ifAccelerate;
 
+    std::vector<G4double> res;
 	CDEXRunAction* run;
     //TFile ResultFile;
     //TTree Distribution_Results;

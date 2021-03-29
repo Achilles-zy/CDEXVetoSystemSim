@@ -21,8 +21,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 CDEXSteppingAction::CDEXSteppingAction(
-				     CDEXEventAction* evt,CDEXRunAction* run)
-:CDEXEvent(evt),CDEXRun(run),EnableAcc(false)
+				     CDEXEventAction* evt,CDEXRunAction* run,CDEXDetectorConstruction* cons)
+:CDEXEvent(evt),CDEXRun(run),CDEXCons(cons), EnableAcc(false)
 { }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -102,18 +102,19 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	//	CDEXEvent->DetectableTrue();
 	//}
 
-	if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && edep > 0) {
+	if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && edep > 1 * eV && particle_name != "opticalphoton") {
+		CDEXEvent->RecordStepInfo(EvtPos.getX(), EvtPos.getY(), EvtPos.getZ(), edep);
+	}
+
+	G4String Mode = CDEXCons->GetMode();
+	if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && edep > 1 * eV && particle_name != "opticalphoton") {
 		CDEXEvent->DetectableTrue();
-		auto analysisManager = G4AnalysisManager::Instance();
-		analysisManager->FillNtupleDColumn(3, 0, EvtPos.getX());
-		analysisManager->FillNtupleDColumn(3, 0, EvtPos.getY());
-		analysisManager->FillNtupleDColumn(3, 0, EvtPos.getZ());
-		analysisManager->FillNtupleDColumn(3, 0, edep);
+		CDEXEvent->RecordStepInfoInScintillator(EvtPos.getX(), EvtPos.getY(), EvtPos.getZ(), edep);
 	}
 
 	//G4cout << aStep->GetPostStepPoint()->GetPosition() << G4endl;
 	//for (int i = 0; i < 4; i++) {
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 3; i++) {
 		if (volume == detectorConstruction->GetSiPM(i) && detectorConstruction->GetSiPM(i) != nullptr && particle_name == "opticalphoton" ) {
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			CDEXEvent->DetectableTrue();
@@ -139,7 +140,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 		}
 	}
 
-	for (int j = 0; j < 5; j++) {
+	for (int j = 0; j < 1; j++) {
 		if (volume == detectorConstruction->GetContainerSiPM(j) && detectorConstruction->GetContainerSiPM(j) != nullptr && particle_name == "opticalphoton") {
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 

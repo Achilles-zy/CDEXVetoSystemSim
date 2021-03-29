@@ -68,12 +68,26 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
   analysisManager->CreateNtupleDColumn(3, "Edep");
   analysisManager->FinishNtuple(3);
 
-  analysisManager->CreateNtuple("EdepEnvVeto", "Edep outside Detector");
+  analysisManager->CreateNtuple("EdepEnvVeto", "Veto Edep outside Detector");
   analysisManager->CreateNtupleDColumn(4, "PosX");
   analysisManager->CreateNtupleDColumn(4, "PosY");
   analysisManager->CreateNtupleDColumn(4, "PosZ");
   analysisManager->CreateNtupleDColumn(4, "Edep");
   analysisManager->FinishNtuple(4);
+
+  analysisManager->CreateNtuple("EdepArgon", "Edep in Argon");
+  analysisManager->CreateNtupleDColumn(5, "PosX");
+  analysisManager->CreateNtupleDColumn(5, "PosY");
+  analysisManager->CreateNtupleDColumn(5, "PosZ");
+  analysisManager->CreateNtupleDColumn(5, "Edep");
+  analysisManager->FinishNtuple(5);
+
+  analysisManager->CreateNtuple("EdepArgonVeto", "Veto Edep in Argon");
+  analysisManager->CreateNtupleDColumn(6, "PosX");
+  analysisManager->CreateNtupleDColumn(6, "PosY");
+  analysisManager->CreateNtupleDColumn(6, "PosZ");
+  analysisManager->CreateNtupleDColumn(6, "Edep");
+  analysisManager->FinishNtuple(6);
 
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->RegisterAccumulable(SiPMEventCount);
@@ -271,19 +285,17 @@ void CDEXRunAction::CDEXOutput(const G4Run* aRun) {
 		std::ofstream output;
 		if (aRun->GetRunID() == 0) {
 			output.open(txtname + ".txt", std::ios::ate);
-			if (fPrimaryGenerator->GetSrcType() == "PENShell") {
-				output 
-					<< "Source Distribution:\t"<< "PENShell" << G4endl;
-			}
-			else if (fPrimaryGenerator->GetSrcType() == "Wire") {
+			if (fPrimaryGenerator->GetSrcType() == "Wire") {
 				output
 					<< "Source Distribution:\t" << "Wire" << G4endl
 					<< "Wire Type:\t" << fDetCons->GetWireType() << G4endl
 				    << "Reflector Type:\t" << fDetCons->GetReflectorType() << G4endl;
+			}	
+			else
+			{
+				output
+					<< "Source Distribution:\t" << fPrimaryGenerator->GetSrcType() << G4endl;
 			}
-			output
-				//<< "Confine Info:\t" << fDetCons->GetConfine() << G4endl
-				<< "Simulation Result:" << G4endl;
 		}
 		else
 		{

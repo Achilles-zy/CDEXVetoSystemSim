@@ -16,7 +16,7 @@ class CDEXRunAction;
 class CDEXSteppingAction : public G4UserSteppingAction
 {
   public:
-      CDEXSteppingAction(CDEXEventAction*, CDEXRunAction*);
+      CDEXSteppingAction(CDEXEventAction*, CDEXRunAction*, CDEXDetectorConstruction*);
       ~CDEXSteppingAction() {};
 
     void UserSteppingAction(const G4Step*);
@@ -26,6 +26,7 @@ class CDEXSteppingAction : public G4UserSteppingAction
 
     CDEXEventAction*      CDEXEvent;
     CDEXRunAction* CDEXRun;
+    CDEXDetectorConstruction* CDEXCons;
     G4int SignalSiPMCount;
     G4int ContainerSignalSiPMCount;
     G4bool EnableAcc;

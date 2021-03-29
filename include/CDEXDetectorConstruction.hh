@@ -36,6 +36,7 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         const G4VPhysicalVolume* GetEnv() const;
         const G4LogicalVolume* GetLogicBEGe() const;
         const G4LogicalVolume* GetLogicBulk() const;
+        const G4LogicalVolume* GetArgonVolume(G4String mode) const;
 
         G4VPhysicalVolume* Construct();
         G4VPhysicalVolume* GetPhysicalVolumeByName(const G4String& name);
@@ -361,6 +362,16 @@ inline const G4LogicalVolume* CDEXDetectorConstruction::GetLogicBEGe() const
 inline const G4LogicalVolume* CDEXDetectorConstruction::GetLogicBulk() const
 {
     return logicBulk;
+}
+
+inline const G4LogicalVolume* CDEXDetectorConstruction::GetArgonVolume(G4String mode) const
+{
+    if (mode == "CDEXFiberBucket") {
+        return logicBucketFiberCrystal;
+    }
+    else if (mode == "CDEXSiPMBucket") {
+        return logicBucketSiPMCrystal;
+    }
 }
 
 inline const G4VPhysicalVolume* CDEXDetectorConstruction::GetSiPM(G4int i) const
