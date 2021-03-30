@@ -42,10 +42,6 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 
 	auto touchable = aStep->GetPostStepPoint()->GetTouchableHandle();
 	auto particle_name = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
-
-	if (particle_name == "gamma") {
-		G4cout << particle_name << G4endl;
-	}
 	auto edep = aStep->GetTotalEnergyDeposit();
 	G4int TrackID = aStep->GetTrack()->GetTrackID();
 	//**********************For Acceleration**********************//
