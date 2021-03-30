@@ -43,6 +43,9 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	auto touchable = aStep->GetPostStepPoint()->GetTouchableHandle();
 	auto particle_name = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
 
+	if (particle_name == "gamma") {
+		G4cout << particle_name << G4endl;
+	}
 	auto edep = aStep->GetTotalEnergyDeposit();
 	G4int TrackID = aStep->GetTrack()->GetTrackID();
 	//**********************For Acceleration**********************//
@@ -102,14 +105,31 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	//	CDEXEvent->DetectableTrue();
 	//}
 
+	G4int ParticleType;
+	if (particle_name == "gamma") {
+		ParticleType = 0;
+	}
+	else if (particle_name == "e-") {
+		ParticleType = 1;
+	}
+	else if (particle_name == "e+") {
+		ParticleType = 2;
+	}
+	else if (particle_name == "alpha") {
+		ParticleType = 3;
+	}
+	else{
+		ParticleType = 4;
+	}
+
 	if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && edep > 1 * eV && particle_name != "opticalphoton") {
-		CDEXEvent->RecordStepInfo(EvtPos.getX(), EvtPos.getY(), EvtPos.getZ(), edep);
+		CDEXEvent->RecordStepInfo(ParticleType, EvtPos.getX(), EvtPos.getY(), EvtPos.getZ(), edep);
 	}
 
 	G4String Mode = CDEXCons->GetMode();
 	if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && edep > 1 * eV && particle_name != "opticalphoton") {
 		CDEXEvent->DetectableTrue();
-		CDEXEvent->RecordStepInfoInScintillator(EvtPos.getX(), EvtPos.getY(), EvtPos.getZ(), edep);
+		CDEXEvent->RecordStepInfoInScintillator(ParticleType, EvtPos.getX(), EvtPos.getY(), EvtPos.getZ(), edep);
 	}
 
 	//G4cout << aStep->GetPostStepPoint()->GetPosition() << G4endl;

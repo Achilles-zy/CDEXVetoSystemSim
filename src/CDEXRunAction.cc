@@ -51,7 +51,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
   analysisManager->FinishNtuple(0);
 
   analysisManager->CreateNtuple("PhotonCount", "PhotonCoutnt");
-  for (int i = 0; i < 30; i++) {
+  for (int i = 0; i < 5; i++) {
 	  G4String Ntuplename = "SiPMPhotonCount" + std::to_string(i);
 	  analysisManager->CreateNtupleIColumn(1, Ntuplename);
   }
@@ -62,6 +62,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
   analysisManager->FinishNtuple(2);
 
   analysisManager->CreateNtuple("EdepEnv", "Edep outside Detector");
+  analysisManager->CreateNtupleIColumn(3, "ParticleType");
   analysisManager->CreateNtupleDColumn(3, "PosX");
   analysisManager->CreateNtupleDColumn(3, "PosY");
   analysisManager->CreateNtupleDColumn(3, "PosZ");
@@ -69,6 +70,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
   analysisManager->FinishNtuple(3);
 
   analysisManager->CreateNtuple("EdepEnvVeto", "Veto Edep outside Detector");
+  analysisManager->CreateNtupleIColumn(4, "ParticleType");
   analysisManager->CreateNtupleDColumn(4, "PosX");
   analysisManager->CreateNtupleDColumn(4, "PosY");
   analysisManager->CreateNtupleDColumn(4, "PosZ");
@@ -76,13 +78,16 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
   analysisManager->FinishNtuple(4);
 
   analysisManager->CreateNtuple("EdepArgon", "Edep in Argon");
+  analysisManager->CreateNtupleIColumn(5, "ParticleType");
   analysisManager->CreateNtupleDColumn(5, "PosX");
   analysisManager->CreateNtupleDColumn(5, "PosY");
   analysisManager->CreateNtupleDColumn(5, "PosZ");
   analysisManager->CreateNtupleDColumn(5, "Edep");
+
   analysisManager->FinishNtuple(5);
 
   analysisManager->CreateNtuple("EdepArgonVeto", "Veto Edep in Argon");
+  analysisManager->CreateNtupleIColumn(6, "ParticleType");
   analysisManager->CreateNtupleDColumn(6, "PosX");
   analysisManager->CreateNtupleDColumn(6, "PosY");
   analysisManager->CreateNtupleDColumn(6, "PosZ");

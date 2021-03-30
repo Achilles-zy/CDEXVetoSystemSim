@@ -98,6 +98,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 	analysisManager->FillH1(1, TotalSiPMPhotonCount);
 	analysisManager->FillH1(2, TotalSiPMPhotonCount);
 	analysisManager->FillNtupleDColumn(2, 0, edepBulk);
+	analysisManager->AddNtupleRow(2);
 	//analysisManager->FillNtupleDColumn(2, 1, edepBulk);
 
 	//G4int rownb = sizeof(SiPMPhotonCount) / sizeof(SiPMPhotonCount[0]);
@@ -229,32 +230,55 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 
 	if (DepositeInfo.empty() == false) {
 		for (G4int i = 0; i < DepositeInfo.size(); i++) {
-			for (G4int j = 0; j < DepositeInfo[0].size(); j++) {
+			analysisManager->FillNtupleIColumn(3, 0, DepositeInfo[i][0]);
+			analysisManager->AddNtupleRow(3);
+			if (edepBulk > 160 * eV) {
+				analysisManager->FillNtupleIColumn(4, 0, DepositeInfo[i][0]);
+				analysisManager->AddNtupleRow(4);
+			}
+			//G4cout << DepositeInfo[i][0] << " " ;
+			for (G4int j = 1; j < DepositeInfo[0].size(); j++) {
 				analysisManager->FillNtupleDColumn(3, j, DepositeInfo[i][j]);
+				analysisManager->AddNtupleRow(3);
 				if (edepBulk > 160 * eV) {
 					analysisManager->FillNtupleDColumn(4, j, DepositeInfo[i][j]);
+					analysisManager->AddNtupleRow(4);
 				}
 				//G4cout << DepositeInfo[i][j] << " " ;
 			}
 			//G4cout << G4endl;
 		}
+
 	}
 
 	if (DepositeInfoInScintillator.empty() == false) {
 		for (G4int i = 0; i < DepositeInfoInScintillator.size(); i++) {
-			for (G4int j = 0; j < DepositeInfoInScintillator[0].size(); j++) {
+			analysisManager->FillNtupleIColumn(5, 0, DepositeInfoInScintillator[i][0]);
+			analysisManager->AddNtupleRow(5);
+			if (edepBulk > 160 * eV) {
+				analysisManager->FillNtupleIColumn(6, 0, DepositeInfoInScintillator[i][0]);
+				analysisManager->AddNtupleRow(6);
+			}
+			//G4cout << DepositeInfo[i][0] << " " ;
+			for (G4int j = 1; j < DepositeInfoInScintillator[0].size(); j++) {
 				analysisManager->FillNtupleDColumn(5, j, DepositeInfoInScintillator[i][j]);
+				analysisManager->AddNtupleRow(5);
 				if (edepBulk > 160 * eV) {
 					analysisManager->FillNtupleDColumn(6, j, DepositeInfoInScintillator[i][j]);
+					analysisManager->AddNtupleRow(6);
 				}
 				//G4cout << DepositeInfo[i][j] << " " ;
 			}
+
 			//G4cout << G4endl;
 		}
+		analysisManager->AddNtupleRow(5);
+		analysisManager->AddNtupleRow(6);
 	}
 	//G4cout << "Size=" << DepositeInfo.size() << G4endl;
 	//G4cout << "Size2=" << DepositeInfo[0].size() << G4endl;
 	//ID++;
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -282,8 +306,9 @@ void CDEXEventAction::AddToContainerSiPMSignal(G4int i, G4int j) {
 	ContainerSiPMSignalCount[i][j]++;
 }
 
-void CDEXEventAction::RecordStepInfo(G4double posx, G4double posy, G4double posz, G4double edep) {
+void CDEXEventAction::RecordStepInfo(G4int particletype, G4double posx, G4double posy, G4double posz, G4double edep) {
 	std::vector<G4double> StepInfo;
+	StepInfo.push_back(particletype);
 	StepInfo.push_back(posx);
 	StepInfo.push_back(posy);
 	StepInfo.push_back(posz);
@@ -292,8 +317,9 @@ void CDEXEventAction::RecordStepInfo(G4double posx, G4double posy, G4double posz
 	StepInfo.clear();
 }
 
-void CDEXEventAction::RecordStepInfoInScintillator(G4double posx, G4double posy, G4double posz, G4double edep) {
+void CDEXEventAction::RecordStepInfoInScintillator(G4int particletype, G4double posx, G4double posy, G4double posz, G4double edep) {
 	std::vector<G4double> StepInfo;
+	StepInfo.push_back(particletype);
 	StepInfo.push_back(posx);
 	StepInfo.push_back(posy);
 	StepInfo.push_back(posz);
