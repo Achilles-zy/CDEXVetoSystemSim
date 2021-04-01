@@ -5,6 +5,7 @@
 #include "CDEXDetectorConstruction.hh"
 #include "CDEXEventAction.hh"
 #include "CDEXRunAction.hh"
+#include "CDEXTrackingAction.hh"
 
 #include "G4Track.hh"
 #include "G4SteppingManager.hh"
@@ -21,8 +22,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 CDEXSteppingAction::CDEXSteppingAction(
-				     CDEXEventAction* evt,CDEXRunAction* run,CDEXDetectorConstruction* cons)
-:CDEXEvent(evt),CDEXRun(run),CDEXCons(cons), EnableAcc(false)
+	CDEXTrackingAction* track, CDEXEventAction* evt, CDEXRunAction* run, CDEXDetectorConstruction* cons)
+	:CDEXTrack(track), CDEXEvent(evt), CDEXRun(run), CDEXCons(cons), EnableAcc(false)
 { }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -31,7 +32,8 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	EnableAcc = CDEXRun->GetAccelerate();
 	//G4cout << "EnableAcc: " << CDEXRun->GetAccelerate() << G4endl;
 	auto volume = aStep->GetPostStepPoint()->GetTouchableHandle()->GetVolume();
-	G4ThreeVector EvtPos = aStep->GetPostStepPoint()->GetPosition();
+	G4ThreeVector PostStepPos = aStep->GetPostStepPoint()->GetPosition();
+	G4ThreeVector PreStepPos = aStep->GetPreStepPoint()->GetPosition();
 	G4LogicalVolume* logicvolume;
 	if (volume) {
 		logicvolume = volume->GetLogicalVolume();
@@ -41,9 +43,15 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	}
 
 	auto touchable = aStep->GetPostStepPoint()->GetTouchableHandle();
-	auto particle_name = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
+	auto ParticleName = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
 	auto edep = aStep->GetTotalEnergyDeposit();
+	if (aStep->GetTrack()->GetCurrentStepNumber() == 1) {
+		CDEXTrack->RecordTrackPos(PreStepPos);
+	}
+	CDEXTrack->AddEdepTrack(edep);
 	G4int TrackID = aStep->GetTrack()->GetTrackID();
+	//G4cout << aStep->GetTrack()->GetCurrentStepNumber() << G4endl;
+	//G4cout << PreStepPos << G4endl;
 	//**********************For Acceleration**********************//
 	if (EnableAcc == true) {
 		if (CDEXEvent->GetAcceletateStatus() == false && TrackID % 200 == 0) {
@@ -78,10 +86,10 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 			}
 		}
 
-		if (CDEXEvent->GetAcceletateStatus() == true && particle_name == "opticalphoton") {
+		if (CDEXEvent->GetAcceletateStatus() == true && ParticleName == "opticalphoton") {
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 		}
-		//if (CDEXEvent->GetTotalSiPMPhotonCnt() > 2 && particle_name == "opticalphoton") {
+		//if (CDEXEvent->GetTotalSiPMPhotonCnt() > 2 && ParticleName == "opticalphoton") {
 		//	aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 		//}
 	}
@@ -92,46 +100,74 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 		= static_cast<const CDEXDetectorConstruction*>
 		(G4RunManager::GetRunManager()->GetUserDetectorConstruction());
 
-	if (logicvolume == detectorConstruction->GetLogicBulk() && particle_name != "opticalphoton") {
+	if (logicvolume == detectorConstruction->GetLogicBulk() && ParticleName != "opticalphoton") {
 		//CDEXEvent->BulkTrue();
 		CDEXEvent->AddBulkEnergy(edep);
 	}
 
-	//if (particle_name == "opticalphoton") {
+	//if (ParticleName == "opticalphoton") {
 	//	CDEXEvent->DetectableTrue();
 	//}
 
-	G4int ParticleType;
-	if (particle_name == "gamma") {
+	G4int ParticleType = -1;
+	if (ParticleName == "opticalphoton") {
 		ParticleType = 0;
 	}
-	else if (particle_name == "e-") {
+	else if (ParticleName == "gamma") {
 		ParticleType = 1;
 	}
-	else if (particle_name == "e+") {
+	else if (ParticleName == "e-") {
 		ParticleType = 2;
 	}
-	else if (particle_name == "alpha") {
+	else if (ParticleName == "e+") {
 		ParticleType = 3;
 	}
-	else{
+	else if (ParticleName == "alpha") {
 		ParticleType = 4;
 	}
+	else{
+		ParticleType = 5;
+	}
 
-	if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && edep > 1 * eV && particle_name != "opticalphoton") {
-		CDEXEvent->RecordStepInfo(ParticleType, EvtPos.getX(), EvtPos.getY(), EvtPos.getZ(), edep);
+	G4String CreatorProcessName;
+	if (aStep->GetTrack()->GetTrackID() > 1) {
+		CreatorProcessName = aStep->GetTrack()->GetCreatorProcess()->GetProcessName();
+	}
+
+	G4int CreatorProcessType = -1;
+	if (CreatorProcessName == "RadioactiveDecay") {
+		CreatorProcessType = 0;
+	}
+	else if (CreatorProcessName == "conv") {
+		CreatorProcessType = 1;
+	}
+	else if (CreatorProcessName == "phot") {
+		CreatorProcessType = 2;
+	}
+	else if (CreatorProcessName == "compt") {
+		CreatorProcessType = 3;
+	}
+	else {
+		CreatorProcessType = 4;
+	}
+	//Record Gamma Photon-electric Process
+	if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && edep > 1 * eV && ParticleType == 1) {
+		CDEXEvent->RecordStepInfo(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), edep);
 	}
 
 	G4String Mode = CDEXCons->GetMode();
-	if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && edep > 1 * eV && particle_name != "opticalphoton") {
+	if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && edep > 1 * eV && ParticleType != 0) {
 		CDEXEvent->DetectableTrue();
-		CDEXEvent->RecordStepInfoInScintillator(ParticleType, EvtPos.getX(), EvtPos.getY(), EvtPos.getZ(), edep);
+		if (ParticleType == 1) {
+			//Record Gamma Photon-electric Process
+			CDEXEvent->RecordStepInfoInScintillator(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), edep);
+		}
 	}
 
 	//G4cout << aStep->GetPostStepPoint()->GetPosition() << G4endl;
 	//for (int i = 0; i < 4; i++) {
 	for (int i = 0; i < 3; i++) {
-		if (volume == detectorConstruction->GetSiPM(i) && detectorConstruction->GetSiPM(i) != nullptr && particle_name == "opticalphoton" ) {
+		if (volume == detectorConstruction->GetSiPM(i) && detectorConstruction->GetSiPM(i) != nullptr && ParticleName == "opticalphoton" ) {
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			CDEXEvent->DetectableTrue();
 			G4int GetCopyNumber0 = touchable->GetCopyNumber(0);
@@ -157,7 +193,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	}
 
 	for (int j = 0; j < 1; j++) {
-		if (volume == detectorConstruction->GetContainerSiPM(j) && detectorConstruction->GetContainerSiPM(j) != nullptr && particle_name == "opticalphoton") {
+		if (volume == detectorConstruction->GetContainerSiPM(j) && detectorConstruction->GetContainerSiPM(j) != nullptr && ParticleName == "opticalphoton") {
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 
 			G4int GetCopyNumber0 = touchable->GetCopyNumber(0);

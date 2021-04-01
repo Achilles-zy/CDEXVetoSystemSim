@@ -63,6 +63,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
 
   analysisManager->CreateNtuple("EdepEnv", "Edep outside Detector");
   analysisManager->CreateNtupleIColumn(3, "ParticleType");
+  analysisManager->CreateNtupleIColumn(3, "CreatorProcess");
   analysisManager->CreateNtupleDColumn(3, "PosX");
   analysisManager->CreateNtupleDColumn(3, "PosY");
   analysisManager->CreateNtupleDColumn(3, "PosZ");
@@ -71,6 +72,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
 
   analysisManager->CreateNtuple("EdepEnvVeto", "Veto Edep outside Detector");
   analysisManager->CreateNtupleIColumn(4, "ParticleType");
+  analysisManager->CreateNtupleIColumn(4, "CreatorProcess");
   analysisManager->CreateNtupleDColumn(4, "PosX");
   analysisManager->CreateNtupleDColumn(4, "PosY");
   analysisManager->CreateNtupleDColumn(4, "PosZ");
@@ -79,15 +81,16 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
 
   analysisManager->CreateNtuple("EdepArgon", "Edep in Argon");
   analysisManager->CreateNtupleIColumn(5, "ParticleType");
+  analysisManager->CreateNtupleIColumn(5, "CreatorProcess");
   analysisManager->CreateNtupleDColumn(5, "PosX");
   analysisManager->CreateNtupleDColumn(5, "PosY");
   analysisManager->CreateNtupleDColumn(5, "PosZ");
   analysisManager->CreateNtupleDColumn(5, "Edep");
-
   analysisManager->FinishNtuple(5);
 
   analysisManager->CreateNtuple("EdepArgonVeto", "Veto Edep in Argon");
   analysisManager->CreateNtupleIColumn(6, "ParticleType");
+  analysisManager->CreateNtupleIColumn(6, "CreatorProcess");
   analysisManager->CreateNtupleDColumn(6, "PosX");
   analysisManager->CreateNtupleDColumn(6, "PosY");
   analysisManager->CreateNtupleDColumn(6, "PosZ");

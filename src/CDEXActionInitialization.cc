@@ -44,8 +44,11 @@ void CDEXActionInitialization::Build() const
 	CDEXEventAction* eventAction = new CDEXEventAction(runAction);
 	SetUserAction(eventAction);
 
-	SetUserAction(new CDEXSteppingAction(eventAction, runAction, fDetCons));
-	//SetUserAction(new CDEXTrackingAction(eventAction));
+	CDEXTrackingAction* trackAction = new CDEXTrackingAction(eventAction, fDetCons);
+	SetUserAction(trackAction);
+
+	SetUserAction(new CDEXSteppingAction(trackAction, eventAction, runAction, fDetCons));
+
 	//SetUserAction(new CDEXTrackingAction(eventAction));
 	SetUserAction(new CDEXStackingAction);
 }

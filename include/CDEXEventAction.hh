@@ -31,8 +31,8 @@ class CDEXEventAction : public G4UserEventAction
     void CountEscapedPhoton(G4int ph) { EscapedPhotonCount = EscapedPhotonCount + ph; }
     G4int GetTotalSiPMPhotonCnt() { return TotalSiPMPhotonCount; }
 
-    void RecordStepInfo(G4int particletype, G4double posx, G4double posy, G4double posz, G4double edep);
-    void RecordStepInfoInScintillator(G4int particletype, G4double posx, G4double posy, G4double posz, G4double edep);
+    void RecordStepInfo(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep);
+    void RecordStepInfoInScintillator(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep);
 
     G4int GetRowNb() { return RowNb; }
     G4int GetColumnNb() { return ColumnNb; }

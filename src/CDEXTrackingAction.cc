@@ -12,12 +12,16 @@
 #include "G4VVisManager.hh"
 #include "G4ios.hh"
 #include "G4RunManager.hh"
+#include "G4SystemOfUnits.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
  
-CDEXTrackingAction::CDEXTrackingAction(CDEXEventAction* evt)
-    :CDEXEvent(evt)
-{}
+CDEXTrackingAction::CDEXTrackingAction(CDEXEventAction* evt, CDEXDetectorConstruction* cons)
+    :CDEXEvent(evt),CDEXCons(cons)
+{
+    EdepTrack = 0;
+    TrackPos = G4ThreeVector(0, 0, 0);
+}
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
  
 CDEXTrackingAction::~CDEXTrackingAction()
@@ -27,17 +31,10 @@ CDEXTrackingAction::~CDEXTrackingAction()
  
 void CDEXTrackingAction::PreUserTrackingAction(const G4Track* track)
 {
-
+    EdepTrack = 0;
+    TrackPos = G4ThreeVector(0, 0, 0);
     
-    G4double charge = track->GetDefinition()->GetPDGCharge();
-    G4int ID = track->GetTrackID();
-    G4int parentID = track->GetParentID();
-    //G4cout << "photoncnt = " << CDEXEvent->GetPhotonCnt() << G4endl;
     G4double trackTime = track->GetGlobalTime();
-    //if (CDEXEvent->GetPhotonCnt() > 3) {
-        //track->GetStep()->GetTrack()->SetTrackStatus(fStopAndKill);
-    //}
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -47,28 +44,85 @@ void CDEXTrackingAction::PostUserTrackingAction(const G4Track* trk)
     const CDEXDetectorConstruction* detectorConstruction
         = static_cast<const CDEXDetectorConstruction*>
         (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-    G4String particlename = trk->GetParticleDefinition()->GetParticleName();
-    if (trk->GetVolume() == detectorConstruction->GetEnv() && particlename == "opticalphoton") {
-        //CDEXEvent->CountEscapedPhoton(1);
-        //G4cout << trk->GetVolume()->GetName() << G4endl;
-        //G4cout << "Next" << G4endl;
-    }
 
-    //G4cout << trk->GetVolume()->GetName() << G4endl;
-    //G4cout << detectorConstruction->GetEnv()->GetName() << G4endl;
-    //G4cout << trk->GetVolume()->GetName() << G4endl;
-    //G4cout << trk->GetNextVolume()->GetName() << G4endl;
-    //G4cout << "" <<G4endl;
-    /*
-    auto next_volume = trk->GetNextVolume();
-    for(G4int i=0; i<16; i++)
-    {
-        auto sipm = CDEXDetCons->GetSiPM(i);
-        if(sipm == next_volume){
-            CDEXEvent->AddToSiPM(i);
-        }
-    }
-    */
+	auto volume = trk->GetVolume();
+	G4LogicalVolume* logicvolume;
+	if (volume) {
+		logicvolume = volume->GetLogicalVolume();
+		//G4cout << volume << volume->GetName() << G4endl;
+		//G4cout << logicvolume << logicvolume->GetName() << G4endl;
+		//G4cout << G4endl;
+	}
+
+	G4String ParticleName = trk->GetParticleDefinition()->GetParticleName();
+	//G4cout << ParticleName << G4endl;
+	G4int ParticleType = -1;
+	G4bool ifFastDeposition = false;
+	if (ParticleName == "opticalphoton") {
+		ParticleType = 0;
+	}
+	else if (ParticleName == "gamma") {
+		ParticleType = 1;
+	}
+	else if (ParticleName == "e-") {
+		ParticleType = 2;
+		ifFastDeposition = true;
+	}
+	else if (ParticleName == "e+") {
+		ParticleType = 3;
+		ifFastDeposition = true;
+	}
+	else if (ParticleName == "alpha") {
+		ParticleType = 4;
+		ifFastDeposition = true;
+	}
+	else {
+		ParticleType = 5;
+	}
+	G4int ID = trk->GetTrackID();
+	G4String CreatorProcessName = "Default";
+	if (ID > 1) {
+		CreatorProcessName = trk->GetCreatorProcess()->GetProcessName();
+	}
+
+	G4int CreatorProcessType = -1;
+	if (CreatorProcessName == "RadioactiveDecay") {
+		CreatorProcessType = 0;
+	}
+	else if (CreatorProcessName == "conv") {
+		CreatorProcessType = 1;
+	}
+	else if (CreatorProcessName == "phot") {
+		CreatorProcessType = 2;
+	}
+	else if (CreatorProcessName == "compt") {
+		CreatorProcessType = 3;
+	}
+	else {
+		CreatorProcessType = 4;
+	}
+	//Record Gamma Photon-electric Process
+
+	if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && EdepTrack > 1 * eV && ifFastDeposition == true) {
+		CDEXEvent->RecordStepInfo(ParticleType, CreatorProcessType, TrackPos.getX(), TrackPos.getY(), TrackPos.getZ(), EdepTrack);
+	}
+
+	G4String Mode = CDEXCons->GetMode();
+	if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && EdepTrack > 1 * eV && ParticleType != 0) {
+		CDEXEvent->DetectableTrue();
+		if (ifFastDeposition == true) {
+			//Record Gamma Photon-electric Process
+			CDEXEvent->RecordStepInfoInScintillator(ParticleType, CreatorProcessType, TrackPos.getX(), TrackPos.getY(), TrackPos.getZ(), EdepTrack);
+		}
+	}
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void CDEXTrackingAction::AddEdepTrack(G4double edepstep) {
+    EdepTrack += edepstep;
+}
+
+void CDEXTrackingAction::RecordTrackPos(G4ThreeVector trackpos) {
+    TrackPos = trackpos;
+}
