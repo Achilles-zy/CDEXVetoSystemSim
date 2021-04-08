@@ -153,6 +153,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	//Record Gamma Photon-electric Process
 	if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && edep > 1 * eV && ParticleType == 1) {
 		CDEXEvent->RecordStepInfo(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), edep);
+		//G4cout << "Recorded" << G4endl;
 	}
 
 	G4String Mode = CDEXCons->GetMode();
@@ -160,10 +161,10 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 		CDEXEvent->DetectableTrue();
 		if (ParticleType == 1) {
 			//Record Gamma Photon-electric Process
+			//G4cout << "Recorded" << G4endl;
 			CDEXEvent->RecordStepInfoInScintillator(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), edep);
 		}
 	}
-
 	//G4cout << aStep->GetPostStepPoint()->GetPosition() << G4endl;
 	//for (int i = 0; i < 4; i++) {
 	for (int i = 0; i < 3; i++) {

@@ -235,17 +235,19 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 			if (edepBulk > 160 * eV) {
 				analysisManager->FillNtupleIColumn(4, 0, DepositeInfo[i][0]);
 				analysisManager->FillNtupleIColumn(4, 1, DepositeInfo[i][1]);
+				analysisManager->AddNtupleRow(4);
 			}
 			//G4cout << DepositeInfo[i][0] << " " ;
 			for (G4int j = 2; j < DepositeInfo[0].size(); j++) {
 				analysisManager->FillNtupleDColumn(3, j, DepositeInfo[i][j]);
 				if (edepBulk > 160 * eV) {
 					analysisManager->FillNtupleDColumn(4, j, DepositeInfo[i][j]);
+					analysisManager->AddNtupleRow(4);
 				}
 				//G4cout << DepositeInfo[i][j] << " " ;
 			}
 			analysisManager->AddNtupleRow(3);
-			analysisManager->AddNtupleRow(4);
+
 			//G4cout << G4endl;
 		}
 
@@ -258,17 +260,19 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 			if (edepBulk > 160 * eV) {
 				analysisManager->FillNtupleIColumn(6, 0, DepositeInfoInScintillator[i][0]);
 				analysisManager->FillNtupleIColumn(6, 1, DepositeInfoInScintillator[i][1]);
+				analysisManager->AddNtupleRow(6);
 			}
 			//G4cout << DepositeInfo[i][0] << " " ;
 			for (G4int j = 2; j < DepositeInfoInScintillator[0].size(); j++) {
 				analysisManager->FillNtupleDColumn(5, j, DepositeInfoInScintillator[i][j]);
 				if (edepBulk > 160 * eV) {
 					analysisManager->FillNtupleDColumn(6, j, DepositeInfoInScintillator[i][j]);
+					analysisManager->AddNtupleRow(6);
 				}
 				//G4cout << DepositeInfo[i][j] << " " ;
 			}
 			analysisManager->AddNtupleRow(5);
-			analysisManager->AddNtupleRow(6);
+
 			//G4cout << G4endl;
 		}
 

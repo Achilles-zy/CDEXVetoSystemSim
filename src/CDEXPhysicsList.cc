@@ -337,9 +337,9 @@ void CDEXPhysicsList::ConstructOp()
           pmanager->SetProcessOrderingToLast(theScintProcessAlpha,idxPostStep);
         }
         else {
-          //pmanager->AddProcess(fScintillationProcess);
-          //pmanager->SetProcessOrderingToLast(fScintillationProcess, idxAtRest);
-          //pmanager->SetProcessOrderingToLast(fScintillationProcess, idxPostStep);
+          pmanager->AddProcess(fScintillationProcess);
+          pmanager->SetProcessOrderingToLast(fScintillationProcess, idxAtRest);
+          pmanager->SetProcessOrderingToLast(fScintillationProcess, idxPostStep);
        }
     }
     if (particleName == "opticalphoton") {

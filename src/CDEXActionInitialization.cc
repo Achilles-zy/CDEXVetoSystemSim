@@ -49,6 +49,5 @@ void CDEXActionInitialization::Build() const
 
 	SetUserAction(new CDEXSteppingAction(trackAction, eventAction, runAction, fDetCons));
 
-	//SetUserAction(new CDEXTrackingAction(eventAction));
 	SetUserAction(new CDEXStackingAction);
 }

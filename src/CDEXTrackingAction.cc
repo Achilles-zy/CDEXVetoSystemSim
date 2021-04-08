@@ -33,7 +33,6 @@ void CDEXTrackingAction::PreUserTrackingAction(const G4Track* track)
 {
     EdepTrack = 0;
     TrackPos = G4ThreeVector(0, 0, 0);
-    
     G4double trackTime = track->GetGlobalTime();
 }
 
@@ -45,6 +44,7 @@ void CDEXTrackingAction::PostUserTrackingAction(const G4Track* trk)
         = static_cast<const CDEXDetectorConstruction*>
         (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
 
+	G4double Ekin = trk->GetKineticEnergy();
 	auto volume = trk->GetVolume();
 	G4LogicalVolume* logicvolume;
 	if (volume) {
@@ -53,10 +53,10 @@ void CDEXTrackingAction::PostUserTrackingAction(const G4Track* trk)
 		//G4cout << logicvolume << logicvolume->GetName() << G4endl;
 		//G4cout << G4endl;
 	}
-
 	G4String ParticleName = trk->GetParticleDefinition()->GetParticleName();
 	//G4cout << ParticleName << G4endl;
 	G4int ParticleType = -1;
+	
 	G4bool ifFastDeposition = false;
 	if (ParticleName == "opticalphoton") {
 		ParticleType = 0;
@@ -84,7 +84,16 @@ void CDEXTrackingAction::PostUserTrackingAction(const G4Track* trk)
 	if (ID > 1) {
 		CreatorProcessName = trk->GetCreatorProcess()->GetProcessName();
 	}
-
+	if (CreatorProcessName != "eIoni" && CreatorProcessName != "Cerenkov") {
+		//G4cout << CreatorProcessName << G4endl;
+		//G4cout << trk->GetTrackStatus() << G4endl;
+		//G4cout << trk->GetTrackID() << G4endl;
+		//G4cout << trk->GetKineticEnergy() << G4endl;
+		//G4cout << trk->GetTrackLength() / 1 * mm << G4endl;
+	}
+	//
+	trk->GetParentID();
+	
 	G4int CreatorProcessType = -1;
 	if (CreatorProcessName == "RadioactiveDecay") {
 		CreatorProcessType = 0;
@@ -98,22 +107,30 @@ void CDEXTrackingAction::PostUserTrackingAction(const G4Track* trk)
 	else if (CreatorProcessName == "compt") {
 		CreatorProcessType = 3;
 	}
-	else {
+	else if (CreatorProcessName == "eIoni") {
 		CreatorProcessType = 4;
+	}
+	else {
+		CreatorProcessType = 5;
 	}
 	//Record Gamma Photon-electric Process
 
 	if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && EdepTrack > 1 * eV && ifFastDeposition == true) {
 		CDEXEvent->RecordStepInfo(ParticleType, CreatorProcessType, TrackPos.getX(), TrackPos.getY(), TrackPos.getZ(), EdepTrack);
+		//G4cout << EdepTrack << G4endl;
+		//G4cout << "Recorded" << G4endl;
 	}
 
 	G4String Mode = CDEXCons->GetMode();
 	if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && EdepTrack > 1 * eV && ParticleType != 0) {
 		CDEXEvent->DetectableTrue();
-		if (ifFastDeposition == true) {
-			//Record Gamma Photon-electric Process
-			CDEXEvent->RecordStepInfoInScintillator(ParticleType, CreatorProcessType, TrackPos.getX(), TrackPos.getY(), TrackPos.getZ(), EdepTrack);
-		}
+	}
+
+	if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && EdepTrack > 1 * eV && ifFastDeposition == true) {
+		CDEXEvent->DetectableTrue();
+		//Record Gamma Photon-electric Process
+		CDEXEvent->RecordStepInfoInScintillator(ParticleType, CreatorProcessType, TrackPos.getX(), TrackPos.getY(), TrackPos.getZ(), EdepTrack);
+		//G4cout << "Recorded" << G4endl;
 	}
 }
 
