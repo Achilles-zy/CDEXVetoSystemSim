@@ -4,10 +4,10 @@
 /run/verbose 0
 #
 # Change the default number of threads (in multi-threaded mode)
-/run/numberOfThreads 48
+/run/numberOfThreads 1
 
-/CDEX/sim/set/mode CDEXBucket
-/CDEX/src/type Wire
+/CDEX/sim/set/mode CDEXFiberBucket
+/CDEX/src/type BucketCrystal
 
 # Initialize kernel
 /run/initialize
