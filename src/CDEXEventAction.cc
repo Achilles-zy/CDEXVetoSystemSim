@@ -85,6 +85,11 @@ void CDEXEventAction::BeginOfEventAction(const G4Event* evt)
 	ifAccelerate = false;
 	DepositeInfo.clear();
 	DepositeInfoInScintillator.clear();
+
+	EdepInfo.clear();
+	TempPosList.clear();
+	EdepInfoInScintillator.clear();
+	TempPosListInScintillator.clear();
 	//G4cout << evt->GetEventID() << G4endl;
 	// G4cout<<ID<<G4endl;
 }
@@ -228,55 +233,74 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 		G4cout << evtID << G4endl;
 	}
 
-	if (DepositeInfo.empty() == false) {
-		for (G4int i = 0; i < DepositeInfo.size(); i++) {
-			analysisManager->FillNtupleIColumn(3, 0, DepositeInfo[i][0]);
-			analysisManager->FillNtupleIColumn(3, 1, DepositeInfo[i][1]);
-			if (edepBulk > 160 * eV) {
-				analysisManager->FillNtupleIColumn(4, 0, DepositeInfo[i][0]);
-				analysisManager->FillNtupleIColumn(4, 1, DepositeInfo[i][1]);
-				analysisManager->AddNtupleRow(4);
-			}
-			//G4cout << DepositeInfo[i][0] << " " ;
-			for (G4int j = 2; j < DepositeInfo[0].size(); j++) {
-				analysisManager->FillNtupleDColumn(3, j, DepositeInfo[i][j]);
-				if (edepBulk > 160 * eV) {
-					analysisManager->FillNtupleDColumn(4, j, DepositeInfo[i][j]);
-					analysisManager->AddNtupleRow(4);
-				}
-				//G4cout << DepositeInfo[i][j] << " " ;
-			}
+	if (EdepInfo.empty() == false) {
+		for (G4int i = 0; i < EdepInfo.size(); i++) {
+			analysisManager->FillNtupleIColumn(3, 0, EdepInfo[i][0]);
+			analysisManager->FillNtupleIColumn(3, 1, EdepInfo[i][1]);
+			analysisManager->FillNtupleDColumn(3, 2, EdepInfo[i][2]);
+			analysisManager->FillNtupleDColumn(3, 3, EdepInfo[i][3]);
+			analysisManager->FillNtupleDColumn(3, 4, EdepInfo[i][4]);
+			analysisManager->FillNtupleDColumn(3, 5, EdepInfo[i][5]);
 			analysisManager->AddNtupleRow(3);
 
-			//G4cout << G4endl;
+			if (edepBulk > 160 * eV) {
+				analysisManager->FillNtupleIColumn(4, 0, EdepInfo[i][0]);
+				analysisManager->FillNtupleIColumn(4, 1, EdepInfo[i][1]);
+				analysisManager->FillNtupleDColumn(4, 2, EdepInfo[i][2]);
+				analysisManager->FillNtupleDColumn(4, 3, EdepInfo[i][3]);
+				analysisManager->FillNtupleDColumn(4, 4, EdepInfo[i][4]);
+				analysisManager->FillNtupleDColumn(4, 5, EdepInfo[i][5]);
+				analysisManager->AddNtupleRow(4);
+			}
 		}
-
 	}
 
-	if (DepositeInfoInScintillator.empty() == false) {
-		for (G4int i = 0; i < DepositeInfoInScintillator.size(); i++) {
-			analysisManager->FillNtupleIColumn(5, 0, DepositeInfoInScintillator[i][0]);
-			analysisManager->FillNtupleIColumn(5, 1, DepositeInfoInScintillator[i][1]);
-			if (edepBulk > 160 * eV) {
-				analysisManager->FillNtupleIColumn(6, 0, DepositeInfoInScintillator[i][0]);
-				analysisManager->FillNtupleIColumn(6, 1, DepositeInfoInScintillator[i][1]);
-				analysisManager->AddNtupleRow(6);
-			}
-			//G4cout << DepositeInfo[i][0] << " " ;
-			for (G4int j = 2; j < DepositeInfoInScintillator[0].size(); j++) {
-				analysisManager->FillNtupleDColumn(5, j, DepositeInfoInScintillator[i][j]);
-				if (edepBulk > 160 * eV) {
-					analysisManager->FillNtupleDColumn(6, j, DepositeInfoInScintillator[i][j]);
-					analysisManager->AddNtupleRow(6);
-				}
-				//G4cout << DepositeInfo[i][j] << " " ;
-			}
+	if (EdepInfoInScintillator.empty() == false) {
+		for (G4int i = 0; i < EdepInfoInScintillator.size(); i++) {
+			analysisManager->FillNtupleIColumn(5, 0, EdepInfoInScintillator[i][0]);
+			analysisManager->FillNtupleIColumn(5, 1, EdepInfoInScintillator[i][1]);
+			analysisManager->FillNtupleDColumn(5, 2, EdepInfoInScintillator[i][2]);
+			analysisManager->FillNtupleDColumn(5, 3, EdepInfoInScintillator[i][3]);
+			analysisManager->FillNtupleDColumn(5, 4, EdepInfoInScintillator[i][4]);
+			analysisManager->FillNtupleDColumn(5, 5, EdepInfoInScintillator[i][5]);
 			analysisManager->AddNtupleRow(5);
 
-			//G4cout << G4endl;
+			if (edepBulk > 160 * eV) {
+				analysisManager->FillNtupleIColumn(6, 0, EdepInfoInScintillator[i][0]);
+				analysisManager->FillNtupleIColumn(6, 1, EdepInfoInScintillator[i][1]);
+				analysisManager->FillNtupleDColumn(6, 2, EdepInfoInScintillator[i][2]);
+				analysisManager->FillNtupleDColumn(6, 3, EdepInfoInScintillator[i][3]);
+				analysisManager->FillNtupleDColumn(6, 4, EdepInfoInScintillator[i][4]);
+				analysisManager->FillNtupleDColumn(6, 5, EdepInfoInScintillator[i][5]);
+				analysisManager->AddNtupleRow(6);
+			}
 		}
-
 	}
+
+	//if (DepositeInfoInScintillator.empty() == false) {
+	//	for (G4int i = 0; i < DepositeInfoInScintillator.size(); i++) {
+	//		analysisManager->FillNtupleIColumn(5, 0, DepositeInfoInScintillator[i][0]);
+	//		analysisManager->FillNtupleIColumn(5, 1, DepositeInfoInScintillator[i][1]);
+	//		if (edepBulk > 160 * eV) {
+	//			analysisManager->FillNtupleIColumn(6, 0, DepositeInfoInScintillator[i][0]);
+	//			analysisManager->FillNtupleIColumn(6, 1, DepositeInfoInScintillator[i][1]);
+	//			analysisManager->AddNtupleRow(6);
+	//		}
+	//		//G4cout << DepositeInfo[i][0] << " " ;
+	//		for (G4int j = 2; j < DepositeInfoInScintillator[0].size(); j++) {
+	//			analysisManager->FillNtupleDColumn(5, j, DepositeInfoInScintillator[i][j]);
+	//			if (edepBulk > 160 * eV) {
+	//				analysisManager->FillNtupleDColumn(6, j, DepositeInfoInScintillator[i][j]);
+	//				analysisManager->AddNtupleRow(6);
+	//			}
+	//			//G4cout << DepositeInfo[i][j] << " " ;
+	//		}
+	//		analysisManager->AddNtupleRow(5);
+
+	//		//G4cout << G4endl;
+	//	}
+
+	//}
 	//G4cout << "Size=" << DepositeInfo.size() << G4endl;
 	//G4cout << "Size2=" << DepositeInfo[0].size() << G4endl;
 	//ID++;
@@ -332,4 +356,92 @@ void CDEXEventAction::RecordStepInfoInScintillator(G4int particletype, G4int cre
 
 	DepositeInfoInScintillator.push_back(StepInfo);
 	StepInfo.clear();
+}
+
+void CDEXEventAction::RecordEdepInfo(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep) {
+	std::vector<G4double> StepInfo;
+
+	StepInfo.push_back(particletype);
+	StepInfo.push_back(creatorprocess);
+	StepInfo.push_back(posx);
+	StepInfo.push_back(posy);
+	StepInfo.push_back(posz);
+	StepInfo.push_back(edep);
+
+	std::vector<G4double> Pos;
+	Pos.push_back(posx);
+	Pos.push_back(posy);
+	Pos.push_back(posz);
+
+	if (TempPosList.empty()) {
+		TempPosList.push_back(Pos);
+		EdepInfo.push_back(StepInfo);
+	}
+	else
+	{
+		for (G4int i = 0; i < TempPosList.size(); i++) {
+			G4double dist = GetDistance(TempPosList[i][0], TempPosList[i][1], TempPosList[i][2], Pos[0], Pos[1], Pos[2]);
+			if (dist > 5 * mm) {
+				TempPosList.push_back(Pos);
+				EdepInfo.push_back(StepInfo);
+			}
+			else
+			{
+				EdepInfo[i][5] += edep;
+				if (particletype == 1) {
+					EdepInfo[i][0] == 1;
+				}
+			}
+		}
+	}
+
+	StepInfo.clear();
+	Pos.clear();
+}
+
+void CDEXEventAction::RecordEdepInfoInScintillator(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep) {
+	std::vector<G4double> StepInfo;
+
+	StepInfo.push_back(particletype);
+	StepInfo.push_back(creatorprocess);
+	StepInfo.push_back(posx);
+	StepInfo.push_back(posy);
+	StepInfo.push_back(posz);
+	StepInfo.push_back(edep);
+
+	std::vector<G4double> Pos;
+	Pos.push_back(posx);
+	Pos.push_back(posy);
+	Pos.push_back(posz);
+
+	if (TempPosListInScintillator.empty()) {
+		TempPosListInScintillator.push_back(Pos);
+		EdepInfoInScintillator.push_back(StepInfo);
+	}
+	else
+	{
+		for (G4int i = 0; i < TempPosListInScintillator.size(); i++) {
+			G4double dist = GetDistance(TempPosListInScintillator[i][0], TempPosListInScintillator[i][1], TempPosListInScintillator[i][2], Pos[0], Pos[1], Pos[2]);
+			if (dist > 5 * mm) {
+				TempPosListInScintillator.push_back(Pos);
+				EdepInfoInScintillator.push_back(StepInfo);
+			}
+			else
+			{
+				EdepInfoInScintillator[i][5] += edep;
+				if (particletype == 1) {
+					EdepInfoInScintillator[i][0] == 1;
+				}
+			}
+		}
+	}
+
+	StepInfo.clear();
+	Pos.clear();
+}
+
+G4double CDEXEventAction::GetDistance(G4double x0, G4double y0, G4double z0, G4double x1, G4double y1, G4double z1) {
+	G4double res;
+	res = std::sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1) + (z0 - z1) * (z0 - z1));
+	return res;
 }

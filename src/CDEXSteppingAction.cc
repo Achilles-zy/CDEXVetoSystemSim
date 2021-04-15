@@ -45,11 +45,13 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	auto touchable = aStep->GetPostStepPoint()->GetTouchableHandle();
 	auto ParticleName = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
 	auto edep = aStep->GetTotalEnergyDeposit();
+	auto DeltaE = aStep->GetPreStepPoint()->GetKineticEnergy() - aStep->GetPostStepPoint()->GetKineticEnergy();
 	if (aStep->GetTrack()->GetCurrentStepNumber() == 1) {
 		CDEXTrack->RecordTrackPos(PreStepPos);
 	}
 	CDEXTrack->AddEdepTrack(edep);
 	G4int TrackID = aStep->GetTrack()->GetTrackID();
+	G4int ParentTrackID = aStep->GetTrack()->GetParentID();
 	//G4cout << aStep->GetTrack()->GetCurrentStepNumber() << G4endl;
 	//G4cout << PreStepPos << G4endl;
 	//**********************For Acceleration**********************//
@@ -96,6 +98,9 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	
 	//***********************************************************//
 
+
+	//Record Energy Deposition
+	//***********************************************************//
 	const CDEXDetectorConstruction* detectorConstruction
 		= static_cast<const CDEXDetectorConstruction*>
 		(G4RunManager::GetRunManager()->GetUserDetectorConstruction());
@@ -110,24 +115,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	//}
 
 	G4int ParticleType = -1;
-	if (ParticleName == "opticalphoton") {
-		ParticleType = 0;
-	}
-	else if (ParticleName == "gamma") {
-		ParticleType = 1;
-	}
-	else if (ParticleName == "e-") {
-		ParticleType = 2;
-	}
-	else if (ParticleName == "e+") {
-		ParticleType = 3;
-	}
-	else if (ParticleName == "alpha") {
-		ParticleType = 4;
-	}
-	else{
-		ParticleType = 5;
-	}
+	ParticleType = GetParticleIntType(ParticleName);
 
 	G4String CreatorProcessName;
 	if (aStep->GetTrack()->GetTrackID() > 1) {
@@ -135,36 +123,34 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	}
 
 	G4int CreatorProcessType = -1;
-	if (CreatorProcessName == "RadioactiveDecay") {
-		CreatorProcessType = 0;
-	}
-	else if (CreatorProcessName == "conv") {
-		CreatorProcessType = 1;
-	}
-	else if (CreatorProcessName == "phot") {
-		CreatorProcessType = 2;
-	}
-	else if (CreatorProcessName == "compt") {
-		CreatorProcessType = 3;
-	}
-	else {
-		CreatorProcessType = 4;
-	}
-	//Record Gamma Photon-electric Process
-	if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && edep > 1 * eV && ParticleType == 1) {
-		CDEXEvent->RecordStepInfo(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), edep);
-		//G4cout << "Recorded" << G4endl;
-	}
+	CreatorProcessType = GetCreatorProcessIntType(CreatorProcessName);
 
 	G4String Mode = CDEXCons->GetMode();
 	if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && edep > 1 * eV && ParticleType != 0) {
 		CDEXEvent->DetectableTrue();
-		if (ParticleType == 1) {
-			//Record Gamma Photon-electric Process
+	}
+
+	if (ParentTrackID == 1) {
+		if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && DeltaE > 1 * eV && ParticleType != 0) {
+			CDEXEvent->RecordEdepInfo(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), DeltaE);
 			//G4cout << "Recorded" << G4endl;
-			CDEXEvent->RecordStepInfoInScintillator(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), edep);
+		}
+
+		G4String Mode = CDEXCons->GetMode();
+		if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && DeltaE > 1 * eV && ParticleType != 0) {
+			CDEXEvent->DetectableTrue();
+			if (ParticleType == 1) {
+				//G4cout << "Recorded" << G4endl;
+				CDEXEvent->RecordEdepInfoInScintillator(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), DeltaE);
+			}
 		}
 	}
+
+	//***********************************************************//
+
+
+
+	//Record SiPM Step
 	//G4cout << aStep->GetPostStepPoint()->GetPosition() << G4endl;
 	//for (int i = 0; i < 4; i++) {
 	for (int i = 0; i < 3; i++) {
@@ -228,6 +214,14 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	//if (parentID == 1) {
 	//	//G4cout << "Parent ID =" << parentID << "Particle =" << aStep->GetTrack()->GetParticleDefinition()->GetParticleName() << "Process =" << aStep->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() <<aStep->GetTotalEnergyDeposit()<< G4endl;
 	//}
+	//G4cout << aStep->GetDeltaEnergy() << " "
+	//	<< DeltaE << " "
+	//	<< aStep->GetTotalEnergyDeposit() << " "
+	//	<< aStep->GetPreStepPoint()->GetKineticEnergy() << " "
+	//	<< aStep->GetPostStepPoint()->GetKineticEnergy() << " "
+	//	<< aStep->GetPreStepPoint()->GetTotalEnergy() << " "
+	//	<< aStep->GetPostStepPoint()->GetTotalEnergy() << " "
+	//	<< G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

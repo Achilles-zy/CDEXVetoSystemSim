@@ -57,81 +57,60 @@ void CDEXTrackingAction::PostUserTrackingAction(const G4Track* trk)
 	//G4cout << ParticleName << G4endl;
 	G4int ParticleType = -1;
 	
+	ParticleType = GetParticleIntType(ParticleName);
+
 	G4bool ifFastDeposition = false;
-	if (ParticleName == "opticalphoton") {
-		ParticleType = 0;
-	}
-	else if (ParticleName == "gamma") {
-		ParticleType = 1;
-	}
-	else if (ParticleName == "e-") {
-		ParticleType = 2;
+	if (ParticleName == "e-" || ParticleName == "e+" || ParticleName == "alpha") {
 		ifFastDeposition = true;
 	}
-	else if (ParticleName == "e+") {
-		ParticleType = 3;
-		ifFastDeposition = true;
-	}
-	else if (ParticleName == "alpha") {
-		ParticleType = 4;
-		ifFastDeposition = true;
-	}
-	else {
-		ParticleType = 5;
-	}
+
 	G4int ID = trk->GetTrackID();
 	G4String CreatorProcessName = "Default";
 	if (ID > 1) {
 		CreatorProcessName = trk->GetCreatorProcess()->GetProcessName();
 	}
-	if (CreatorProcessName != "eIoni" && CreatorProcessName != "Cerenkov") {
-		//G4cout << CreatorProcessName << G4endl;
-		//G4cout << trk->GetTrackStatus() << G4endl;
-		//G4cout << trk->GetTrackID() << G4endl;
-		//G4cout << trk->GetKineticEnergy() << G4endl;
-		//G4cout << trk->GetTrackLength() / 1 * mm << G4endl;
-	}
+
+	G4cout << trk->GetTrackID() << " "
+		<< trk->GetParentID() << "	"
+		<< CreatorProcessName << " "
+		<< trk->GetTrackStatus() << " "
+		<< trk->GetTrackID() << " "
+		<< trk->GetKineticEnergy() << " "
+		<< trk->GetTrackLength() / 1 * mm << G4endl;
+
+	//if (CreatorProcessName == "compt"|| CreatorProcessName == "phot") {
+	//	G4cout << trk->GetTrackID() << " "
+	//		<< trk->GetParentID() << "	"
+	//		<< CreatorProcessName << " "
+	//		<< trk->GetTrackStatus() << " "
+	//		<< trk->GetTrackID() << " "
+	//		<< trk->GetKineticEnergy() << " "
+	//		<< trk->GetTrackLength() / 1 * mm << G4endl;
+	//}
 	//
 	trk->GetParentID();
 	
 	G4int CreatorProcessType = -1;
-	if (CreatorProcessName == "RadioactiveDecay") {
-		CreatorProcessType = 0;
-	}
-	else if (CreatorProcessName == "conv") {
-		CreatorProcessType = 1;
-	}
-	else if (CreatorProcessName == "phot") {
-		CreatorProcessType = 2;
-	}
-	else if (CreatorProcessName == "compt") {
-		CreatorProcessType = 3;
-	}
-	else if (CreatorProcessName == "eIoni") {
-		CreatorProcessType = 4;
-	}
-	else {
-		CreatorProcessType = 5;
-	}
-	//Record Gamma Photon-electric Process
+	CreatorProcessType = GetCreatorProcessIntType(CreatorProcessName);
 
-	if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && EdepTrack > 1 * eV && ifFastDeposition == true) {
-		CDEXEvent->RecordStepInfo(ParticleType, CreatorProcessType, TrackPos.getX(), TrackPos.getY(), TrackPos.getZ(), EdepTrack);
-		//G4cout << EdepTrack << G4endl;
-		//G4cout << "Recorded" << G4endl;
-	}
+	//if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && EdepTrack > 1 * eV && ifFastDeposition == true) {
+	//	CDEXEvent->RecordStepInfo(ParticleType, CreatorProcessType, TrackPos.getX(), TrackPos.getY(), TrackPos.getZ(), EdepTrack);
+	//	//G4cout << EdepTrack << G4endl;
+	//	//G4cout << "Recorded" << G4endl;
+	//}
 
-	G4String Mode = CDEXCons->GetMode();
-	if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && EdepTrack > 1 * eV && ParticleType != 0) {
-		CDEXEvent->DetectableTrue();
-	}
+	//G4String Mode = CDEXCons->GetMode();
+	//if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && EdepTrack > 1 * eV && ParticleType != 0) {
+	//	CDEXEvent->DetectableTrue();
+	//}
 
-	if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && EdepTrack > 1 * eV && ifFastDeposition == true) {
-		CDEXEvent->DetectableTrue();
-		//Record Gamma Photon-electric Process
-		CDEXEvent->RecordStepInfoInScintillator(ParticleType, CreatorProcessType, TrackPos.getX(), TrackPos.getY(), TrackPos.getZ(), EdepTrack);
-		//G4cout << "Recorded" << G4endl;
-	}
+	//if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && EdepTrack > 1 * eV && ifFastDeposition == true) {
+	//	//CDEXEvent->DetectableTrue();
+	//	//Record Gamma Photon-electric Process
+	//	CDEXEvent->RecordStepInfoInScintillator(ParticleType, CreatorProcessType, TrackPos.getX(), TrackPos.getY(), TrackPos.getZ(), EdepTrack);
+	//	//G4cout << "Recorded" << G4endl;
+	//}
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

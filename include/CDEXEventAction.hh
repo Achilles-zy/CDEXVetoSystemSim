@@ -34,6 +34,9 @@ class CDEXEventAction : public G4UserEventAction
     void RecordStepInfo(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep);
     void RecordStepInfoInScintillator(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep);
 
+    void RecordEdepInfo(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep);
+    void RecordEdepInfoInScintillator(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep);
+
     G4int GetRowNb() { return RowNb; }
     G4int GetColumnNb() { return ColumnNb; }
     G4int GetContainerRowNb() { return RowNb; }
@@ -50,6 +53,7 @@ class CDEXEventAction : public G4UserEventAction
     void AddToContainerSiPMSignal(G4int, G4int);
     G4int GetContainerSiPMPhotonCount(G4int j, G4int k) { return ContainerSiPMPhotonCount[j][k]; }
     G4int GetContainerSiPMSignalCount(G4int j, G4int k) { return ContainerSiPMSignalCount[j][k]; }
+    G4double GetDistance(G4double x0, G4double y0, G4double z0, G4double x1, G4double y1, G4double z1);
 
   private:
     G4double edepBulk;
@@ -81,6 +85,11 @@ class CDEXEventAction : public G4UserEventAction
     std::vector<std::vector<G4double>> DepositeInfo;
     std::vector<std::vector<G4double>> DepositeInfoInScintillator;
 
+    std::vector<std::vector<G4double>> EdepInfo;
+    std::vector<std::vector<G4double>> TempPosList;
+    std::vector<std::vector<G4double>> EdepInfoInScintillator;
+    std::vector<std::vector<G4double>> TempPosListInScintillator;
+
     G4int ID;
 	G4int TotalSiPMPhotonCount;
     G4int EscapedPhotonCount;
@@ -92,6 +101,7 @@ class CDEXEventAction : public G4UserEventAction
     G4bool ifAccelerate;
 
     std::vector<G4double> res;
+
 	CDEXRunAction* run;
     //TFile ResultFile;
     //TTree Distribution_Results;

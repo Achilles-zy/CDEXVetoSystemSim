@@ -1,3 +1,7 @@
+
+//LEGEND Version
+
+/*
 #include "globals.hh"
 #include "CDEXPhysicsList.hh"
 
@@ -49,29 +53,29 @@ G4ThreadLocal G4OpWLS* CDEXPhysicsList::fWLSProcess = 0;
 
 CDEXPhysicsList::CDEXPhysicsList()
  : G4VUserPhysicsList() {
-	//modified by Luis
-	defaultCutValue     = 1.0*micrometer; //
-        cutForGamma         = defaultCutValue;
-        cutForElectron      = 1.0*nanometer;
-  	cutForPositron      = defaultCutValue;
+
+	defaultCutValue = 1.0 * micrometer; //
+	cutForGamma = defaultCutValue;
+	//cutForElectron = 1.0 * nanometer;
+    cutForElectron = defaultCutValue / 10;
+	cutForPositron = defaultCutValue;
 
   	VerboseLevel = 0;
   	OpVerbLevel = 0;
 
   	SetVerboseLevel(VerboseLevel);
 	//end modifs
-        //read new PhotonEvaporation data set 
-  // mandatory for G4NuclideTable
-  //
-  G4NuclideTable::GetInstance()->SetThresholdOfHalfLife(0.1*picosecond);
-  G4NuclideTable::GetInstance()->SetLevelTolerance(1.0*eV);
-  //
-  G4DeexPrecoParameters* deex =
-    G4NuclearLevelData::GetInstance()->GetParameters();
-  deex->SetCorrelatedGamma(false);
-  deex->SetStoreAllLevels(true);
-  deex->SetMaxLifeTime(G4NuclideTable::GetInstance()->GetThresholdOfHalfLife()
-                /std::log(2.));	
+	//read new PhotonEvaporation data set 
+    // mandatory for G4NuclideTable
+    //
+	G4NuclideTable::GetInstance()->SetThresholdOfHalfLife(0.1 * picosecond);
+	G4NuclideTable::GetInstance()->SetLevelTolerance(1.0 * eV);
+	//
+	G4DeexPrecoParameters* deex =
+		G4NuclearLevelData::GetInstance()->GetParameters();
+	deex->SetCorrelatedGamma(false);
+	deex->SetStoreAllLevels(true);
+	deex->SetMaxLifeTime(G4NuclideTable::GetInstance()->GetThresholdOfHalfLife() / std::log(2.));
  }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -145,7 +149,6 @@ void CDEXPhysicsList::ConstructDecay()
 
   G4RadioactiveDecay* radioactiveDecay = new G4RadioactiveDecay();
   
-
   radioactiveDecay->SetARM(false);               //Atomic Rearangement
   //radioactiveDecay->SetARM(true);               //Atomic Rearangement
 
@@ -380,22 +383,103 @@ void CDEXPhysicsList::SetNbOfPhotonsCerenkov(G4int MaxNumber)
 
 void CDEXPhysicsList::SetCuts()
 {
-  //  " G4VUserPhysicsList::SetCutsWithDefault" method sets
-  //   the default cut value for all particle types
-  //
-  //SetCutsWithDefault();
-  //special for low energy physics
-  G4double lowlimit=250*eV;
-  G4ProductionCutsTable::GetProductionCutsTable()->SetEnergyRange(lowlimit,100.*GeV);
+	//  " G4VUserPhysicsList::SetCutsWithDefault" method sets
+	//   the default cut value for all particle types
+	//
+	//SetCutsWithDefault();
+	//special for low energy physics
+    //G4double lowlimit = 250 * eV;
+	G4double LowerLimit = 25 * eV;
+	G4ProductionCutsTable::GetProductionCutsTable()->SetEnergyRange(LowerLimit, 100. * GeV);
 
-  // set cut values for gamma at first and for e- second and next for e+,
-  // because some processes for e+/e- need cut values for gamma 
-  SetCutValue(cutForGamma, "gamma");
-  SetCutValue(cutForElectron, "e-");
-  SetCutValue(cutForPositron, "e+");
+	// set cut values for gamma at first and for e- second and next for e+,
+	// because some processes for e+/e- need cut values for gamma 
+	SetCutValue(cutForGamma, "gamma");
+	SetCutValue(cutForElectron, "e-");
+	SetCutValue(cutForPositron, "e+");
 
 
 //  if (verboseLevel>0) DumpCutValuesTable();
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
+*/
+
+
+//SAGe Version
+
+#include "G4BosonConstructor.hh"
+#include "G4LeptonConstructor.hh"
+#include "G4MesonConstructor.hh"
+#include "G4BaryonConstructor.hh"
+#include "G4IonConstructor.hh"
+#include "G4ShortLivedConstructor.hh"
+
+
+#include "CDEXPhysicsList.hh"
+#include "CDEXTritiumPhysics.hh"
+#include "CDEXOpticalPhysics.hh"
+
+#include "G4DecayPhysics.hh"
+#include "G4RadioactiveDecayPhysics.hh"
+#include "G4EmStandardPhysics.hh"
+#include "G4EmStandardPhysics_option3.hh"
+#include "G4EmExtraPhysics.hh"
+#include "G4GenericBiasingPhysics.hh"
+
+#include "G4HadronPhysicsFTFP_BERT_HP.hh"
+#include "G4HadronElasticPhysics.hh"
+#include "G4StoppingPhysics.hh"
+#include "G4IonPhysics.hh"
+#include "G4RadioactiveDecay.hh"
+#include "G4SystemOfUnits.hh"
+
+// guide for different physics lists
+// http://geant4-userdoc.web.cern.ch/geant4-userdoc/UsersGuides/ForApplicationDeveloper/html/TrackingAndPhysics/physicsProcess.html
+
+CDEXPhysicsList::CDEXPhysicsList() : G4VModularPhysicsList()
+{
+    SetVerboseLevel(2);
+    // Default physics
+    RegisterPhysics(new G4DecayPhysics());
+    // EM physics (low energy option 3)
+    RegisterPhysics(new G4EmStandardPhysics_option3());
+    // Synchroton Radiation & GN Physics
+    RegisterPhysics(new G4EmExtraPhysics());
+    // Hadronic physics
+    RegisterPhysics(new G4HadronPhysicsFTFP_BERT_HP());
+    // Hadronic Elastic
+    RegisterPhysics(new G4HadronElasticPhysics());
+    // Stopping and ion physics
+    RegisterPhysics(new G4StoppingPhysics());
+    RegisterPhysics(new G4IonPhysics());
+    // Radio active decay physics and add user defined data base
+    auto radioactiveDecayContainer = new G4RadioactiveDecay();
+    G4int Z = 1;
+    G4int A = 3;
+    G4String file_name = "../data/Z1.A3";
+    // const char* nv = (const char*)file_name;
+    radioactiveDecayContainer->AddUserDecayDataFile(Z, A, file_name);
+    RegisterPhysics(new G4RadioactiveDecayPhysics());
+
+    //Customized Physics
+    RegisterPhysics(new CDEXTritiumPhysics());
+    //RegisterPhysics(new CDEXOpticalPhysics());
+
+    // Add biasing to physical list
+    G4GenericBiasingPhysics* biasingPhysics = new G4GenericBiasingPhysics();
+    biasingPhysics->NonPhysicsBias("gamma");
+    // biasingPhysics->NonPhysicsBias("neutron");
+    // biasingPhysics->Bias("alpha");
+    RegisterPhysics(biasingPhysics);
+    SetCutValue(1 * micrometer, "alpha");
+    SetCutValue(1 * micrometer, "gamma");
+    SetCutValue(0.1 * micrometer, "e-");
+    SetCutValue(1 * micrometer, "e+");
+    std::cout << "INFO: Construct the Physical List register !" << std::endl;
+}
+
+CDEXPhysicsList::~CDEXPhysicsList()
+{
+    std::cout << "INFO: Deconstruct the Physical List register !" << std::endl;
+}
