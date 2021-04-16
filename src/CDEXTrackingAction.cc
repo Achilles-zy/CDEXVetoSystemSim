@@ -70,13 +70,13 @@ void CDEXTrackingAction::PostUserTrackingAction(const G4Track* trk)
 		CreatorProcessName = trk->GetCreatorProcess()->GetProcessName();
 	}
 
-	G4cout << trk->GetTrackID() << " "
-		<< trk->GetParentID() << "	"
-		<< CreatorProcessName << " "
-		<< trk->GetTrackStatus() << " "
-		<< trk->GetTrackID() << " "
-		<< trk->GetKineticEnergy() << " "
-		<< trk->GetTrackLength() / 1 * mm << G4endl;
+	//G4cout << trk->GetTrackID() << " "
+	//	<< trk->GetParentID() << "	"
+	//	<< CreatorProcessName << " "
+	//	<< trk->GetTrackStatus() << " "
+	//	<< trk->GetTrackID() << " "
+	//	<< trk->GetKineticEnergy() << " "
+	//	<< trk->GetTrackLength() / 1 * mm << G4endl;
 
 	//if (CreatorProcessName == "compt"|| CreatorProcessName == "phot") {
 	//	G4cout << trk->GetTrackID() << " "

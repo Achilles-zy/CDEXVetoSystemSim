@@ -138,11 +138,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 
 		G4String Mode = CDEXCons->GetMode();
 		if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && DeltaE > 1 * eV && ParticleType != 0) {
-			CDEXEvent->DetectableTrue();
-			if (ParticleType == 1) {
-				//G4cout << "Recorded" << G4endl;
-				CDEXEvent->RecordEdepInfoInScintillator(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), DeltaE);
-			}
+			CDEXEvent->RecordEdepInfoInScintillator(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), DeltaE);
 		}
 	}
 

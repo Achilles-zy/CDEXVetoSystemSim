@@ -83,6 +83,7 @@ void CDEXEventAction::BeginOfEventAction(const G4Event* evt)
 	ifBulk = false;
 	ifDetectable = false;
 	ifAccelerate = false;
+
 	DepositeInfo.clear();
 	DepositeInfoInScintillator.clear();
 
@@ -276,7 +277,9 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 			}
 		}
 	}
-
+	G4cout << "++++++++++++++++++++++++" << G4endl;
+	G4cout << EdepInfo.size() << G4endl;
+	G4cout << EdepInfoInScintillator.size() << G4endl;
 	//if (DepositeInfoInScintillator.empty() == false) {
 	//	for (G4int i = 0; i < DepositeInfoInScintillator.size(); i++) {
 	//		analysisManager->FillNtupleIColumn(5, 0, DepositeInfoInScintillator[i][0]);
@@ -379,18 +382,24 @@ void CDEXEventAction::RecordEdepInfo(G4int particletype, G4int creatorprocess, G
 	}
 	else
 	{
+		G4bool ifNewPoint = true;
+		G4int PointID;
 		for (G4int i = 0; i < TempPosList.size(); i++) {
 			G4double dist = GetDistance(TempPosList[i][0], TempPosList[i][1], TempPosList[i][2], Pos[0], Pos[1], Pos[2]);
-			if (dist > 5 * mm) {
-				TempPosList.push_back(Pos);
-				EdepInfo.push_back(StepInfo);
+			if (dist < 5 * mm) {
+				ifNewPoint = false;
+				PointID = i;
 			}
-			else
-			{
-				EdepInfo[i][5] += edep;
-				if (particletype == 1) {
-					EdepInfo[i][0] == 1;
-				}
+		}
+		if (ifNewPoint == true) {
+			TempPosList.push_back(Pos);
+			EdepInfo.push_back(StepInfo);
+		}
+		else
+		{
+			EdepInfo[PointID][5] += edep;
+			if (particletype == 1) {
+				EdepInfo[PointID][0] == 1;
 			}
 		}
 	}
@@ -400,8 +409,8 @@ void CDEXEventAction::RecordEdepInfo(G4int particletype, G4int creatorprocess, G
 }
 
 void CDEXEventAction::RecordEdepInfoInScintillator(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep) {
+	
 	std::vector<G4double> StepInfo;
-
 	StepInfo.push_back(particletype);
 	StepInfo.push_back(creatorprocess);
 	StepInfo.push_back(posx);
@@ -420,18 +429,24 @@ void CDEXEventAction::RecordEdepInfoInScintillator(G4int particletype, G4int cre
 	}
 	else
 	{
+		G4bool ifNewPoint = true;
+		G4int PointID;
 		for (G4int i = 0; i < TempPosListInScintillator.size(); i++) {
 			G4double dist = GetDistance(TempPosListInScintillator[i][0], TempPosListInScintillator[i][1], TempPosListInScintillator[i][2], Pos[0], Pos[1], Pos[2]);
-			if (dist > 5 * mm) {
-				TempPosListInScintillator.push_back(Pos);
-				EdepInfoInScintillator.push_back(StepInfo);
+			if (dist < 5 * mm) {
+				ifNewPoint = false;
+				PointID = i;
 			}
-			else
-			{
-				EdepInfoInScintillator[i][5] += edep;
-				if (particletype == 1) {
-					EdepInfoInScintillator[i][0] == 1;
-				}
+		}
+		if (ifNewPoint == true) {
+			TempPosListInScintillator.push_back(Pos);
+			EdepInfoInScintillator.push_back(StepInfo);
+		}
+		else
+		{
+			EdepInfoInScintillator[PointID][5] += edep;
+			if (particletype == 1) {
+				EdepInfoInScintillator[PointID][0] == 1;
 			}
 		}
 	}
