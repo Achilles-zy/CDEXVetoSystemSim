@@ -30,6 +30,7 @@ CDEXStackingAction::~CDEXStackingAction()
 G4ClassificationOfNewTrack CDEXStackingAction::ClassifyNewTrack(const G4Track* track)
 {
     G4double charge = track->GetDefinition()->GetPDGCharge();
+    G4bool stable = track->GetDefinition()->GetPDGStable();
     G4int ID = track->GetTrackID();
     G4int parentID = track->GetParentID();
     G4double trackTime = track->GetGlobalTime();
@@ -60,7 +61,8 @@ G4ClassificationOfNewTrack CDEXStackingAction::ClassifyNewTrack(const G4Track* t
     }
     // put radioactive secondaries into stacks
     //
-    if (charge > 2.) {
+    
+    if (charge > 2. && track->GetParticleDefinition()->GetPDGEncoding() % 10 == 0) {
         // if no fullchain kill track else put ions to waiting stack      
         if (!fFullChain) {
             return fKill;

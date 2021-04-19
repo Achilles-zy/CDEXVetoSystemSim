@@ -70,25 +70,25 @@ void CDEXTrackingAction::PostUserTrackingAction(const G4Track* trk)
 		CreatorProcessName = trk->GetCreatorProcess()->GetProcessName();
 	}
 
-	//G4cout << trk->GetTrackID() << " "
-	//	<< trk->GetParentID() << "	"
-	//	<< CreatorProcessName << " "
-	//	<< trk->GetTrackStatus() << " "
-	//	<< trk->GetTrackID() << " "
-	//	<< trk->GetKineticEnergy() << " "
-	//	<< trk->GetTrackLength() / 1 * mm << G4endl;
+	G4int ParentTrackID = trk->GetParentID();
+	G4int TrackID = trk->GetTrackID();
+	//if (trk->GetTrackID() == 1) {
+	//	G4cout << ParticleName << G4endl;
+	//	G4cout << TrackID << G4endl;
+	//	G4cout << ParentTrackID << G4endl;
+	//	G4cout << trk->GetCreatorProcess()->GetProcessName() << G4endl;
 
-	//if (CreatorProcessName == "compt"|| CreatorProcessName == "phot") {
-	//	G4cout << trk->GetTrackID() << " "
-	//		<< trk->GetParentID() << "	"
-	//		<< CreatorProcessName << " "
-	//		<< trk->GetTrackStatus() << " "
-	//		<< trk->GetTrackID() << " "
-	//		<< trk->GetKineticEnergy() << " "
-	//		<< trk->GetTrackLength() / 1 * mm << G4endl;
+	//	G4cout << G4endl;
 	//}
-	//
-	trk->GetParentID();
+
+	//if (ParticleName == "gamma") {
+	//	G4cout << ParticleName << G4endl;
+	//	G4cout << TrackID << G4endl;
+	//	G4cout << ParentTrackID << G4endl;
+	//	G4cout << trk->GetCreatorProcess()->GetProcessName() << G4endl;
+
+	//	G4cout << G4endl;
+	//}
 	
 	G4int CreatorProcessType = -1;
 	CreatorProcessType = GetCreatorProcessIntType(CreatorProcessName);

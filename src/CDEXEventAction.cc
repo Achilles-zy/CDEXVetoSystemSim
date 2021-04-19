@@ -277,9 +277,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 			}
 		}
 	}
-	G4cout << "++++++++++++++++++++++++" << G4endl;
-	G4cout << EdepInfo.size() << G4endl;
-	G4cout << EdepInfoInScintillator.size() << G4endl;
+
 	//if (DepositeInfoInScintillator.empty() == false) {
 	//	for (G4int i = 0; i < DepositeInfoInScintillator.size(); i++) {
 	//		analysisManager->FillNtupleIColumn(5, 0, DepositeInfoInScintillator[i][0]);

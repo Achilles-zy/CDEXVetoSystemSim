@@ -49,7 +49,7 @@ class CDEXTrackingAction : public G4UserTrackingAction
 
 	G4int GetCreatorProcessIntType(G4String name) {
 		G4int creatorprocesstype;
-		if (name == "RadioactiveDecay") {
+		if (name == "RadioactiveDecay"|| name == "RadioactiveDecayBase") {
 			creatorprocesstype = 0;
 		}
 		else if (name == "conv") {

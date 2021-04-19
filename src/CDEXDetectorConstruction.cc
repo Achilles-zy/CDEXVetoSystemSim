@@ -1940,6 +1940,10 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructLightFiber(G4double length) 
 		logicFiberInnerCladding = new G4LogicalVolume(solidFiberInnerCladding, matPMMA, "logicFiberInnerCladding");
 		logicFiberOuterCladding = new G4LogicalVolume(solidFiberOuterCladding, matFluorAcrylic, "logicFiberOuterCladding");
 		logicFiberWLSLayer = new G4LogicalVolume(solidFiberWLSLayer, matTPB, "logicFiberWLSLayer");
+	
+		auto physFiberInnerCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberInnerCladding, "FiberInnerCladding", logicFiber, false, 0, CheckOverlaps);
+		auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "physFiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
+		auto physFiberWLSLayer = new G4PVPlacement(0, G4ThreeVector(), logicFiberWLSLayer, "FiberWLSLayer", logicFiber, false, 0, CheckOverlaps);
 	}
 	else
 	{
@@ -1952,6 +1956,9 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructLightFiber(G4double length) 
 		logicFiber = new G4LogicalVolume(solidFiber, CoreMaterial, "logicFiber");
 		logicFiberInnerCladding = new G4LogicalVolume(solidFiberInnerCladding, matPMMA, "logicFiberInnerCladding");
 		logicFiberOuterCladding = new G4LogicalVolume(solidFiberOuterCladding, matFluorAcrylic, "logicFiberOuterCladding");
+	
+		auto physFiberInnerCladding= new G4PVPlacement(0, G4ThreeVector(), logicFiberInnerCladding, "FiberInnerCladding", logicFiber, false, 0, CheckOverlaps);
+		auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "physFiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
 	}
 
 	const G4int NUMENTRIES_FIBER = 4;

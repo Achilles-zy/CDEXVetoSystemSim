@@ -407,19 +407,6 @@ void CDEXPhysicsList::SetCuts()
 
 
 //SAGe Version
-
-#include "G4BosonConstructor.hh"
-#include "G4LeptonConstructor.hh"
-#include "G4MesonConstructor.hh"
-#include "G4BaryonConstructor.hh"
-#include "G4IonConstructor.hh"
-#include "G4ShortLivedConstructor.hh"
-
-
-#include "CDEXPhysicsList.hh"
-#include "CDEXTritiumPhysics.hh"
-#include "CDEXOpticalPhysics.hh"
-
 #include "G4DecayPhysics.hh"
 #include "G4RadioactiveDecayPhysics.hh"
 #include "G4EmStandardPhysics.hh"
@@ -433,13 +420,19 @@ void CDEXPhysicsList::SetCuts()
 #include "G4IonPhysics.hh"
 #include "G4RadioactiveDecay.hh"
 #include "G4SystemOfUnits.hh"
+#include "Shielding.hh"
+
+
+#include "CDEXPhysicsList.hh"
+#include "CDEXTritiumPhysics.hh"
+#include "CDEXOpticalPhysics.hh"
 
 // guide for different physics lists
 // http://geant4-userdoc.web.cern.ch/geant4-userdoc/UsersGuides/ForApplicationDeveloper/html/TrackingAndPhysics/physicsProcess.html
 
 CDEXPhysicsList::CDEXPhysicsList() : G4VModularPhysicsList()
 {
-    SetVerboseLevel(2);
+    SetVerboseLevel(1);
     // Default physics
     RegisterPhysics(new G4DecayPhysics());
     // EM physics (low energy option 3)
@@ -462,9 +455,10 @@ CDEXPhysicsList::CDEXPhysicsList() : G4VModularPhysicsList()
     radioactiveDecayContainer->AddUserDecayDataFile(Z, A, file_name);
     RegisterPhysics(new G4RadioactiveDecayPhysics());
 
+
     //Customized Physics
     RegisterPhysics(new CDEXTritiumPhysics());
-    //RegisterPhysics(new CDEXOpticalPhysics());
+    RegisterPhysics(new CDEXOpticalPhysics());
 
     // Add biasing to physical list
     G4GenericBiasingPhysics* biasingPhysics = new G4GenericBiasingPhysics();

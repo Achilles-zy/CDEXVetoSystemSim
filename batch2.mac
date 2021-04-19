@@ -4,10 +4,10 @@
 /run/verbose 0
 #
 # Change the default number of threads (in multi-threaded mode)
-/run/numberOfThreads 1
+/run/numberOfThreads 2
 
 /CDEX/sim/set/mode CDEXFiberBucket
-/CDEX/src/type BucketCrystal
+/CDEX/src/type Wire
 
 # Initialize kernel
 /run/initialize
@@ -16,22 +16,6 @@
 /gps/particle ion
 /gps/ion 89 228 0 0
 /gps/energy 0 keV
-/run/beamOn 1000000
+/run/beamOn 100
 
-#Bi212
-/gps/particle ion
-/gps/ion 83 212 0 0
-/gps/energy 0 keV
-/run/beamOn 1000000
 
-#Bi214
-/gps/particle ion
-/gps/ion 83 214 0 0
-/gps/energy 0 keV
-/run/beamOn 1000000
-
-#Tl208
-/gps/particle ion
-/gps/ion 81 208 0 0
-/gps/energy 0 keV
-/run/beamOn 1000000

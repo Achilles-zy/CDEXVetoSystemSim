@@ -52,6 +52,8 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	CDEXTrack->AddEdepTrack(edep);
 	G4int TrackID = aStep->GetTrack()->GetTrackID();
 	G4int ParentTrackID = aStep->GetTrack()->GetParentID();
+
+
 	//G4cout << aStep->GetTrack()->GetCurrentStepNumber() << G4endl;
 	//G4cout << PreStepPos << G4endl;
 	//**********************For Acceleration**********************//
@@ -117,7 +119,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 	G4int ParticleType = -1;
 	ParticleType = GetParticleIntType(ParticleName);
 
-	G4String CreatorProcessName;
+	G4String CreatorProcessName = "Default";
 	if (aStep->GetTrack()->GetTrackID() > 1) {
 		CreatorProcessName = aStep->GetTrack()->GetCreatorProcess()->GetProcessName();
 	}
@@ -130,7 +132,8 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step* aStep)
 		CDEXEvent->DetectableTrue();
 	}
 
-	if (ParentTrackID == 1) {
+	///if (ParentTrackID == 1) {
+	if (CreatorProcessType == 0 || TrackID == 1) {
 		if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && DeltaE > 1 * eV && ParticleType != 0) {
 			CDEXEvent->RecordEdepInfo(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), DeltaE);
 			//G4cout << "Recorded" << G4endl;

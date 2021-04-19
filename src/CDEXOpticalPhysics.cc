@@ -120,18 +120,18 @@ void CDEXOpticalPhysics::ConstructProcess()
         if (fScintillationProcess->IsApplicable(*particle)) {
             if (particle->GetParticleName() == "GenericIon") {
                 pmanager->AddProcess(theScintProcessNuc); // AtRestDiscrete
-                pmanager->SetProcessOrderingToLast(theScintProcessNuc, idxAtRest);
-                pmanager->SetProcessOrderingToLast(theScintProcessNuc, idxPostStep);
+                //pmanager->SetProcessOrderingToLast(theScintProcessNuc, idxAtRest);
+                //pmanager->SetProcessOrderingToLast(theScintProcessNuc, idxPostStep);
             }
             else if (particle->GetParticleName() == "alpha") {
                 pmanager->AddProcess(theScintProcessAlpha);
-                pmanager->SetProcessOrderingToLast(theScintProcessAlpha, idxAtRest);
-                pmanager->SetProcessOrderingToLast(theScintProcessAlpha, idxPostStep);
+                //pmanager->SetProcessOrderingToLast(theScintProcessAlpha, idxAtRest);
+                //pmanager->SetProcessOrderingToLast(theScintProcessAlpha, idxPostStep);
             }
             else {
                 pmanager->AddProcess(fScintillationProcess);
-                pmanager->SetProcessOrderingToLast(fScintillationProcess, idxAtRest);
-                pmanager->SetProcessOrderingToLast(fScintillationProcess, idxPostStep);
+                //pmanager->SetProcessOrderingToLast(fScintillationProcess, idxAtRest);
+                //pmanager->SetProcessOrderingToLast(fScintillationProcess, idxPostStep);
             }
         }
         if (particleName == "opticalphoton") {

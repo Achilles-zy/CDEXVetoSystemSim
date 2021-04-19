@@ -17,7 +17,7 @@ CDEXPrimaryGeneratorAction::CDEXPrimaryGeneratorAction(CDEXDetectorConstruction*
 	PrimaryE(0),
 	InitialE(1 * keV),
 	PrimaryName(""),
-	SrcType("Bucket"),
+	SrcType("Wire"),
 	ImprintID(1)
 {
     fCDEXGPS = new G4GeneralParticleSource();
@@ -500,7 +500,7 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 		fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(Radius);
 		fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(Length / 2);
 		fCDEXGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(WirePos);
-		fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Wire");
+		//fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Wire");
 	}
 
 	else if (SrcType == "Fiber") {
@@ -517,10 +517,10 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 		fCDEXGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("iso");
 		fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Volume");
 		fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisShape("Cylinder");
-		fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(Radius * 2);
+		fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(Radius);
 		fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(Length / 2);
 		fCDEXGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(FiberPos);
-		fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Fiber");
+		//fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Fiber");
 	}
 
 	else if (SrcType == "SingleASIC") {

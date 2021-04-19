@@ -115,10 +115,15 @@
 /vis/geometry/set/visibility logicStringBoxBrick 0 false
 /vis/geometry/set/visibility logicShroudVoid 0 false
 /vis/geometry/set/visibility logicBucketCrystal 0 false
+/vis/geometry/set/visibility logicFiberOuterCladding 0 false
+/vis/geometry/set/visibility logicFiberInnerCladding 0 false
+/vis/geometry/set/visibility logicFiberWLSLayer 0 false
+/vis/geometry/set/visibility logicFiber 0 false
 
 
 # "Envelope" is transparent blue to represent water
 /vis/geometry/set/colour logicPENShell 0 0 0 1 .3
+/vis/geometry/set/colour logicShell 0 0 0 1 .3
 /vis/geometry/set/colour logicBucket 0 0 0 1 .3
 /vis/geometry/set/colour logicShroud 0 0 0 1 .3
 /vis/geometry/set/colour logicContainerCrystal 0 0.3 0.3 0.6 .2
