@@ -32,6 +32,8 @@
 
 #include "Randomize.hh"
 #include "CDEXMaterials.hh"
+#include "QBBC.hh"
+#include "Shielding.hh"
 
 int main(int argc, char** argv)
 {
@@ -66,8 +68,11 @@ int main(int argc, char** argv)
 		i++;
 	}
 	auto physicslist = new CDEXPhysicsList();
+    G4VModularPhysicsList* qbbc = new QBBC;
+    G4VModularPhysicsList* shielding = new Shielding;
 	physicslist->SetVerboseLevel(0);
     CDEXRunManager -> SetUserInitialization(physicslist);
+    //CDEXRunManager->SetUserInitialization(shielding);
 
     CDEXRunManager -> SetUserInitialization(new CDEXActionInitialization(CDEXDetCons));
 
