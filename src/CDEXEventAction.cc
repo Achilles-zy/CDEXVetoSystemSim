@@ -99,6 +99,7 @@ void CDEXEventAction::BeginOfEventAction(const G4Event* evt)
 
 void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 {
+	G4int EventID = evt->GetEventID();
 	auto analysisManager = G4AnalysisManager::Instance();
 	analysisManager->FillH1(0, edepBulk);
 	analysisManager->FillH1(1, TotalSiPMPhotonCount);
@@ -242,6 +243,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 			analysisManager->FillNtupleDColumn(3, 3, EdepInfo[i][3]);
 			analysisManager->FillNtupleDColumn(3, 4, EdepInfo[i][4]);
 			analysisManager->FillNtupleDColumn(3, 5, EdepInfo[i][5]);
+			analysisManager->FillNtupleIColumn(3, 6, EventID);
 			analysisManager->AddNtupleRow(3);
 
 			if (edepBulk > 160 * eV) {
@@ -251,6 +253,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 				analysisManager->FillNtupleDColumn(4, 3, EdepInfo[i][3]);
 				analysisManager->FillNtupleDColumn(4, 4, EdepInfo[i][4]);
 				analysisManager->FillNtupleDColumn(4, 5, EdepInfo[i][5]);
+				analysisManager->FillNtupleIColumn(4, 6, EventID);
 				analysisManager->AddNtupleRow(4);
 			}
 		}
@@ -264,6 +267,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 			analysisManager->FillNtupleDColumn(5, 3, EdepInfoInScintillator[i][3]);
 			analysisManager->FillNtupleDColumn(5, 4, EdepInfoInScintillator[i][4]);
 			analysisManager->FillNtupleDColumn(5, 5, EdepInfoInScintillator[i][5]);
+			analysisManager->FillNtupleIColumn(5, 6, EventID);
 			analysisManager->AddNtupleRow(5);
 
 			if (edepBulk > 160 * eV) {
@@ -273,6 +277,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 				analysisManager->FillNtupleDColumn(6, 3, EdepInfoInScintillator[i][3]);
 				analysisManager->FillNtupleDColumn(6, 4, EdepInfoInScintillator[i][4]);
 				analysisManager->FillNtupleDColumn(6, 5, EdepInfoInScintillator[i][5]);
+				analysisManager->FillNtupleIColumn(6, 6, EventID);
 				analysisManager->AddNtupleRow(6);
 			}
 		}

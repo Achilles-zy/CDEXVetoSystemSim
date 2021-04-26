@@ -68,6 +68,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
   analysisManager->CreateNtupleDColumn(3, "PosY");
   analysisManager->CreateNtupleDColumn(3, "PosZ");
   analysisManager->CreateNtupleDColumn(3, "Edep");
+  analysisManager->CreateNtupleIColumn(3, "EventID");
   analysisManager->FinishNtuple(3);
 
   analysisManager->CreateNtuple("EdepEnvVeto", "Veto Edep outside Detector");
@@ -77,6 +78,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
   analysisManager->CreateNtupleDColumn(4, "PosY");
   analysisManager->CreateNtupleDColumn(4, "PosZ");
   analysisManager->CreateNtupleDColumn(4, "Edep");
+  analysisManager->CreateNtupleIColumn(4, "EventID");
   analysisManager->FinishNtuple(4);
 
   analysisManager->CreateNtuple("EdepArgon", "Edep in Argon");
@@ -86,6 +88,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
   analysisManager->CreateNtupleDColumn(5, "PosY");
   analysisManager->CreateNtupleDColumn(5, "PosZ");
   analysisManager->CreateNtupleDColumn(5, "Edep");
+  analysisManager->CreateNtupleIColumn(5, "EventID");
   analysisManager->FinishNtuple(5);
 
   analysisManager->CreateNtuple("EdepArgonVeto", "Veto Edep in Argon");
@@ -95,6 +98,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction* gen, CDEXDetectorConstr
   analysisManager->CreateNtupleDColumn(6, "PosY");
   analysisManager->CreateNtupleDColumn(6, "PosZ");
   analysisManager->CreateNtupleDColumn(6, "Edep");
+  analysisManager->CreateNtupleIColumn(6, "EventID");
   analysisManager->FinishNtuple(6);
 
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
