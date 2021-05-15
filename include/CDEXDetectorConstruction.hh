@@ -269,7 +269,7 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4Material* matAir;
         G4Material* fVacuum;
         G4Material* matTriggerFoilEJ212;
-        G4Material* Pstyrene;
+        G4Material* matPolystyrene;
         G4Material* fGlass;
         G4Material* fPOM;
         G4Material* fABS;

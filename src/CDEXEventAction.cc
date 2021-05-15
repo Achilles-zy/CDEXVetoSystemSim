@@ -207,15 +207,18 @@ void CDEXEventAction::EndOfEventAction(const G4Event* evt)
 	if (edepBulk > EnergyThreshold) {
 		run->CountBulkEvent();
 		analysisManager->FillH1(3, TotalSiPMPhotonCount);
+		if (ifDetectable == true) {
+			run->CountVetoPossibleEvent();
+		}
 	}
 
 	if (ifDetectable == true) {
 		run->CountDetectableEvent();
 	}
 
-	if (ifDetectable == true && edepBulk > EnergyThreshold) {
-		run->CountVetoPossibleEvent();
-	}
+	//if (ifDetectable == true && edepBulk > EnergyThreshold) {
+	//	run->CountVetoPossibleEvent();
+	//}
 
 	if (edepBulk > 2000 * keV && edepBulk < 2100 * keV) {
 		run->CountROIEvent();

@@ -1718,11 +1718,13 @@ void CDEXMaterials::Register_TPB_Properties()
     G4double WLS_absorption[numTPB];
     G4double WLS_emission[numTPB];
     G4double WLS_refraction[numTPB];
+    G4double WLS_absorptionNormal[numTPB];
 
     for (G4int ji = 0; ji < numTPB; ji++) {
         //N. McFadden
         //arXiv:1210.3793v3 says that TPB is imbedded in cladding thus has same refractive index
         WLS_refraction[ji] = 1.42;
+        WLS_absorptionNormal[ji] = 0.1 * m; //Changed
         // Should the TPB shift the Cherenkov light?
         // This makes a tail starting at 128 until the visible.
         if (LAr_SCPPTPB[ji] >= 3.31 * eV) {// <= 374.57 nm 
@@ -1742,6 +1744,7 @@ void CDEXMaterials::Register_TPB_Properties()
     G4MaterialPropertiesTable* tpbTable = new G4MaterialPropertiesTable();
     tpbTable->AddProperty("RINDEX", LAr_SCPPTPB, WLS_refraction, numTPB);
     tpbTable->AddProperty("WLSABSLENGTH", LAr_SCPPTPB, WLS_absorption, numTPB);
+    tpbTable->AddProperty("ABSLENGTH", LAr_SCPPTPB, WLS_absorptionNormal, numTPB); //Changed:Added
     tpbTable->AddProperty("WLSCOMPONENT", LAr_SCPPTPB, WLS_emission, numTPB);
     // From WArP
     tpbTable->AddConstProperty("WLSTIMECONSTANT", 0.01 * ns);
@@ -1957,7 +1960,7 @@ void CDEXMaterials::Register_Fiber_Cladding_Properties()
     density = 1.2 * g / cm3;
 
     // -- Rough approximation of BCF-10
-    fFiber_claddingInner_material = nistMan->ConstructNewMaterial("PMMA", elements, natoms, density);
+    //fFiber_claddingInner_material = nistMan->ConstructNewMaterial("PMMA", elements, natoms, density);
 
     elements.clear();
     natoms.clear();
@@ -1973,7 +1976,7 @@ void CDEXMaterials::Register_Fiber_Cladding_Properties()
     claddingTable->AddProperty("RINDEX", claddingFixEnergies, claddingRIndex, npoints_fixed);
     //claddingTable->AddProperty("ABSLENGTH",claddingFixEnergies,claddingAbsorption,npoints_fixed);
 
-    fFiber_claddingInner_material->SetMaterialPropertiesTable(claddingTable);
+    //fFiber_claddingInner_material->SetMaterialPropertiesTable(claddingTable);
 
     elements.clear(); natoms.clear();
     //could not find Fluor-acrylic properties, maybe trade marked?
@@ -1988,11 +1991,11 @@ void CDEXMaterials::Register_Fiber_Cladding_Properties()
     G4double claddingOuterFixEnergies[npoints_fixed] = { LambdaE / (650.0 * nanometer),LambdaE / (115.0 * nanometer) };
     G4double claddingOuterRIndex[npoints_fixed] = { 1.42,1.42 };
     //Photons seem to get stuck between TPB and fiber cladding, maybe cladding needs absorption length
-    //G4double claddingAbsorption[npoints_fixed] = {1*m,1*m};
+    G4double claddingOuterAbsorption[npoints_fixed] = {1*m,1*m};
     G4MaterialPropertiesTable* claddingOuterTable = new G4MaterialPropertiesTable();
 
     claddingOuterTable->AddProperty("RINDEX", claddingOuterFixEnergies, claddingOuterRIndex, npoints_fixed);
-    // claddingTable->AddProperty("ABSLENGTH",claddingOuterFixEnergies,claddingOuterAbsorption,npoints_fixed);
+    claddingTable->AddProperty("ABSLENGTH",claddingOuterFixEnergies,claddingOuterAbsorption,npoints_fixed);//Changed
 
     fFiber_claddingOuter_material->SetMaterialPropertiesTable(claddingOuterTable);
     //MGLog(debugging) << " Constructed Fiber Cladding Properties" << endlog;

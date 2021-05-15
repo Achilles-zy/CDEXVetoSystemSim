@@ -84,6 +84,7 @@ void CDEXTrackingAction::PostUserTrackingAction(const G4Track* trk)
 	//if (ParticleName == "gamma") {
 	//	G4cout << ParticleName << G4endl;
 	//	G4cout << TrackID << G4endl;
+	//	G4cout << trk->GetVertexKineticEnergy() << G4endl;
 	//	G4cout << ParentTrackID << G4endl;
 	//	G4cout << trk->GetCreatorProcess()->GetProcessName() << G4endl;
 
@@ -92,6 +93,9 @@ void CDEXTrackingAction::PostUserTrackingAction(const G4Track* trk)
 	
 	G4int CreatorProcessType = -1;
 	CreatorProcessType = GetCreatorProcessIntType(CreatorProcessName);
+	//if (CreatorProcessType == 0) {
+	//	G4cout << CreatorProcessName << G4endl;
+	//}
 
 	//if (volume && logicvolume != detectorConstruction->GetLogicBulk() && logicvolume != detectorConstruction->GetLogicBEGe() && EdepTrack > 1 * eV && ifFastDeposition == true) {
 	//	CDEXEvent->RecordStepInfo(ParticleType, CreatorProcessType, TrackPos.getX(), TrackPos.getY(), TrackPos.getZ(), EdepTrack);

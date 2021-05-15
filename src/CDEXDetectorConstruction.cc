@@ -281,7 +281,7 @@ void CDEXDetectorConstruction::DefineMat()
 	matSi = G4Material::GetMaterial("G4_Si");
 	matCu = G4Material::GetMaterial("G4_Cu");
 	matTriggerFoilEJ212 = G4Material::GetMaterial("EJ212");
-	Pstyrene = G4Material::GetMaterial("Polystyrene");
+	matPolystyrene = G4Material::GetMaterial("Polystyrene");
 	matPMMA = G4Material::GetMaterial("PMMA");
 	fVacuum = G4Material::GetMaterial("Vacuum");
 	matGreaseEJ550 = G4Material::GetMaterial("Grease");
@@ -1923,26 +1923,33 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructShell() {
 	return logicShell;
 }
 
-G4LogicalVolume* CDEXDetectorConstruction::ConstructLightFiber(G4double length) {
+G4LogicalVolume* CDEXDetectorConstruction::ConstructLightFiber(G4double length)
+{
 	G4LogicalVolume* logicFiber;
+	G4LogicalVolume* logicFiberCore;
 	G4LogicalVolume* logicFiberInnerCladding;
 	G4LogicalVolume* logicFiberOuterCladding;
 	G4LogicalVolume* logicFiberWLSLayer;
-	if (ifFiberTPB == true) {
+
+	if (ifFiberTPB == true)
+	{
 		auto solidFiber = new G4Tubs("solidFiber", 0, fFiberRadius + fFiberTPBThickness, length / 2, 0, twopi);
 		auto solidFiberCore = new G4Tubs("solidFiberCore", 0, fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, length / 2, 0, twopi);
 		auto solidFiberInnerCladding = new G4Tubs("solidInnerCladding", fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, fFiberRadius - fFiberOuterCladdingThickness, length / 2, 0, twopi);
 		auto solidFiberOuterCladding = new G4Tubs("solidFiberOuterCladding", fFiberRadius - fFiberOuterCladdingThickness, fFiberRadius, length / 2, 0, twopi);
 		auto solidFiberWLSLayer = new G4Tubs("solidFiberTPB", fFiberRadius, fFiberRadius + fFiberTPBThickness, length / 2, 0, twopi);
 
-		G4Material* CoreMaterial = matFiber;
+		G4Material* CoreMaterial = matPolystyrene;
 		logicFiber = new G4LogicalVolume(solidFiber, CoreMaterial, "logicFiber");
+		logicFiberCore = new G4LogicalVolume(solidFiberCore, CoreMaterial, "logicFiberCore");
 		logicFiberInnerCladding = new G4LogicalVolume(solidFiberInnerCladding, matPMMA, "logicFiberInnerCladding");
 		logicFiberOuterCladding = new G4LogicalVolume(solidFiberOuterCladding, matFluorAcrylic, "logicFiberOuterCladding");
+
 		logicFiberWLSLayer = new G4LogicalVolume(solidFiberWLSLayer, matTPB, "logicFiberWLSLayer");
-	
+
+		auto physFiberCore = new G4PVPlacement(0, G4ThreeVector(), logicFiberCore, "FiberCore", logicFiber, false, 0, CheckOverlaps);
 		auto physFiberInnerCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberInnerCladding, "FiberInnerCladding", logicFiber, false, 0, CheckOverlaps);
-		auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "physFiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
+		auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "FiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
 		auto physFiberWLSLayer = new G4PVPlacement(0, G4ThreeVector(), logicFiberWLSLayer, "FiberWLSLayer", logicFiber, false, 0, CheckOverlaps);
 	}
 	else
@@ -1951,18 +1958,21 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructLightFiber(G4double length) 
 		auto solidFiberCore = new G4Tubs("solidFiberCore", 0, fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, length / 2, 0, twopi);
 		auto solidFiberInnerCladding = new G4Tubs("solidInnerCladding", fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, fFiberRadius - fFiberOuterCladdingThickness, length / 2, 0, twopi);
 		auto solidFiberOuterCladding = new G4Tubs("solidFiberOuterCladding", fFiberRadius - fFiberOuterCladdingThickness, fFiberRadius, length / 2, 0, twopi);
-		
-		G4Material* CoreMaterial = matFiber;
+
+		G4Material* CoreMaterial = matPolystyrene;
 		logicFiber = new G4LogicalVolume(solidFiber, CoreMaterial, "logicFiber");
+		logicFiberCore = new G4LogicalVolume(solidFiberCore, CoreMaterial, "logicFiberCore");
 		logicFiberInnerCladding = new G4LogicalVolume(solidFiberInnerCladding, matPMMA, "logicFiberInnerCladding");
 		logicFiberOuterCladding = new G4LogicalVolume(solidFiberOuterCladding, matFluorAcrylic, "logicFiberOuterCladding");
-	
-		auto physFiberInnerCladding= new G4PVPlacement(0, G4ThreeVector(), logicFiberInnerCladding, "FiberInnerCladding", logicFiber, false, 0, CheckOverlaps);
-		auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "physFiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
+
+		auto physFiberCore = new G4PVPlacement(0, G4ThreeVector(), logicFiberCore, "FiberCore", logicFiber, false, 0, CheckOverlaps);
+		auto physFiberInnerCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberInnerCladding, "FiberInnerCladding", logicFiber, false, 0, CheckOverlaps);
+		auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "FiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
+
 	}
 
 	const G4int NUMENTRIES_FIBER = 4;
-	G4double Wavelength[NUMENTRIES_FIBER] = { 100.,200.,301.,650. };
+	G4double Wavelength[NUMENTRIES_FIBER] = { 100., 200., 301., 650. };
 
 	G4double RefFiberPhotonEnergy[NUMENTRIES_FIBER];
 	G4double RefFiberReflectivity[NUMENTRIES_FIBER];
@@ -1981,11 +1991,17 @@ G4LogicalVolume* CDEXDetectorConstruction::ConstructLightFiber(G4double length) 
 	G4OpticalSurface* FiberRef_Surf = new G4OpticalSurface("Fiber reflective surface", glisur, polished, dielectric_metal);
 	FiberRef_Surf->SetMaterialPropertiesTable(FiberRef_Surf_MPT);
 
-	G4LogicalSkinSurface* InnerCladding_LSS = new G4LogicalSkinSurface("InnerCladding_LSS", logicFiberInnerCladding, FiberRef_Surf);
-	G4LogicalSkinSurface* OuterCladding_LSS = new G4LogicalSkinSurface("OuterCladding_LSS", logicFiberOuterCladding, FiberRef_Surf);
-	G4LogicalSkinSurface* Fiber_LSS = new G4LogicalSkinSurface("Fiber_LSS", logicFiber, FiberRef_Surf);
-	if (ifFiberTPB == true) {
-		G4LogicalSkinSurface* WLSLayer_LSS = new G4LogicalSkinSurface("WLSLayer_LSS", logicFiberWLSLayer, FiberRef_Surf);
+	G4OpticalSurface* FiberCladding_Surf = new G4OpticalSurface("FiberCladding_Surf", glisur, polished, dielectric_dielectric);
+	G4OpticalSurface* FiberCoating_Surf = new G4OpticalSurface("FiberCoating_Surf", unified, polished, dielectric_dielectric);
+	G4OpticalSurface* FiberCore_Surf = new G4OpticalSurface("FiberCoreSurface", glisur, polished, dielectric_dielectric);
+
+	G4LogicalSkinSurface* InnerCladding_LSS = new G4LogicalSkinSurface("InnerCladding_LSS", logicFiberInnerCladding, FiberCladding_Surf);
+	G4LogicalSkinSurface* OuterCladding_LSS = new G4LogicalSkinSurface("OuterCladding_LSS", logicFiberOuterCladding, FiberCladding_Surf);
+	G4LogicalSkinSurface* FiberCore_LSS = new G4LogicalSkinSurface("FiberCore_LSS", logicFiberCore, FiberCore_Surf);
+	G4LogicalSkinSurface* Fiber_LSS = new G4LogicalSkinSurface("Fiber_LSS", logicFiber, FiberCore_Surf);
+	if (ifFiberTPB == true)
+	{
+		G4LogicalSkinSurface* WLSLayer_LSS = new G4LogicalSkinSurface("WLSLayer_LSS", logicFiberWLSLayer, FiberCoating_Surf);
 	}
 
 	return logicFiber;
